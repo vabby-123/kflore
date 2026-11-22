@@ -1,0 +1,294 @@
+@import "tailwindcss";
+
+:root {
+  --color-burgundy: #5a1725;
+  --color-burgundy-light: #742030;
+  --color-soft-black: #151313;
+  --color-ivory: #f5f0e8;
+  --color-gold: #b89a62;
+  --color-rose: #b98282;
+  --color-taupe: #8b7a6d;
+
+  --background: var(--color-ivory);
+  --foreground: var(--color-soft-black);
+
+  /* ---- Spacing scale (design-system rhythm; used by .section / .section-header etc.) ---- */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+  --space-2xl: 96px;
+  --space-3xl: 128px;
+  --space-4xl: 160px;
+
+  /* Fluid section padding: 64px (phone) → 140px (large desktop); editorial: 80px → 180px. */
+  --section-y: clamp(4rem, 2.6rem + 5vw, 8.75rem);
+  --section-y-lg: clamp(5rem, 2.9rem + 7.5vw, 11.25rem);
+
+  /* ---- Layout widths ---- */
+  --width-page: 1440px;
+  --width-content: 1320px;
+  --width-editorial: 720px;
+
+  --header-h: 4.5rem;
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@theme inline {
+  --color-burgundy: var(--color-burgundy);
+  --color-burgundy-light: var(--color-burgundy-light);
+  --color-soft-black: var(--color-soft-black);
+  --color-ivory: var(--color-ivory);
+  --color-gold: var(--color-gold);
+  --color-rose: var(--color-rose);
+  --color-taupe: var(--color-taupe);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  --animate-fade-up: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.6s ease-out both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-burgundy);
+  color: var(--color-ivory);
+}
+
+.font-serif-display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+}
+
+.tracking-label {
+  letter-spacing: 0.16em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout system: section > container > section-header + section-content */
+/* ------------------------------------------------------------------ */
+.container-kflore {
+  width: 100%;
+  max-width: var(--width-page);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .container-kflore {
+    padding-inline: 2.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-kflore {
+    padding-inline: 4rem;
+  }
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+
+.section-lg {
+  padding-block: var(--section-y-lg);
+}
+
+/* Inner pages (shop, product, about…) get a smaller but still generous rhythm. */
+.page-section {
+  padding-block: clamp(2.5rem, 1.6rem + 3.5vw, 6rem);
+}
+
+.section-header {
+  margin-bottom: clamp(2.5rem, 1.7rem + 3vw, 4rem);
+}
+
+.section-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.prose-editorial {
+  max-width: var(--width-editorial);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Header: sticky, transparent over the homepage hero, solid once scrolled. */
+/* No scroll listener re-renders the header; a tiny observer flips data-scrolled. */
+/* ------------------------------------------------------------------ */
+[data-header] {
+  --hdr-fg: var(--color-soft-black);
+  --hdr-accent: var(--color-burgundy);
+  --hdr-brand: var(--color-burgundy);
+  background-color: var(--color-ivory);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-taupe) 25%, transparent);
+  color: var(--hdr-fg);
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+body:has([data-hero-page]) [data-header]:not([data-scrolled]) {
+  --hdr-fg: var(--color-ivory);
+  --hdr-accent: var(--color-gold);
+  --hdr-brand: var(--color-ivory);
+  background-color: transparent;
+  border-bottom-color: transparent;
+}
+
+/* The homepage hero slides underneath the sticky header. */
+.hero-pull {
+  margin-top: calc(var(--header-h) * -1);
+}
+
+/* Mega menu panels: CSS-only hover / focus-within. */
+.mega-panel {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s var(--ease-luxe), visibility 0s linear 0.25s;
+}
+.nav-item:hover > .mega-panel,
+.nav-item:focus-within > .mega-panel {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+
+/* Hero carousel crossfade (opacity only — GPU friendly) */
+.hero-slide {
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+.hero-slide[data-active="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Horizontal scroll-snap rails (product carousel) */
+.snap-rail {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.snap-rail::-webkit-scrollbar {
+  display: none;
+}
+.snap-rail > * {
+  scroll-snap-align: start;
+}
+
+
+@keyframes slide-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes slide-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes slide-down {
+  from {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -6px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-luxe);
+}
+.nav-item:hover > .nav-link::after,
+.nav-item:focus-within > .nav-link::after {
+  transform: scaleX(1);
+}
+
+/* Collection tile CTA: always visible on touch/small screens, revealed on hover for desktop pointers. */
+.tile-cta {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--ease-luxe), transform 0.5s var(--ease-luxe);
+}
+@media (hover: hover) and (min-width: 1024px) {
+  .tile-cta {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .group:hover .tile-cta,
+  .group:focus-visible .tile-cta {
+    opacity: 1;
+    transform: none;
+  }
+}
