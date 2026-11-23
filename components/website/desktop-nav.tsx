@@ -2,7 +2,7 @@ import Link from "next/link";
 import { groupCollectionsByType, type NavCollection } from "@/lib/collections";
 
 const linkClass =
-  "focus-ring nav-link inline-block py-7 text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--hdr-fg)] transition-colors hover:text-[color:var(--hdr-accent)]";
+  "focus-ring nav-link inline-block py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--hdr-fg)] transition-colors hover:text-[color:var(--hdr-accent)]";
 
 const panelLink = "focus-ring block py-1.5 text-sm text-soft-black/80 transition-colors hover:text-burgundy";
 

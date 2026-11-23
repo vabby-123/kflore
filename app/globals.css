@@ -195,6 +195,13 @@ body:has([data-hero-page]) [data-announcement] {
   color: var(--color-ivory) !important;
 }
 
+/* Desktop header is two rows: logo + icons, then the menu underneath. */
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 6.5rem;
+  }
+}
+
 /* The homepage hero slides underneath the sticky header. */
 .hero-pull {
   margin-top: calc(var(--header-h) * -1);
@@ -309,21 +316,20 @@ body:has([data-announcement]) .hero-pull {
 }
 
 /* ------------------------------------------------------------------ */
-/* Image hover: gently pop up on hover, slowly settle back on leave.   */
+/* Image hover: slowly pop up and come into focus, slowly settle back. */
+/* Applies to every image on the page, including the hero.             */
 /* ------------------------------------------------------------------ */
 main img {
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), filter 1.1s ease, opacity 0.6s ease;
   will-change: transform;
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   main .group:hover img,
   main a:hover img,
-  main img:hover {
+  main img:hover,
+  main section:hover > img,
+  main .hero-slide[data-active="true"]:hover img {
     transform: scale(1.07);
-  }
-  /* The hero is full-bleed; keep it still. */
-  main .hero-pull img,
-  main .hero-pull .group:hover img {
-    transform: none;
+    filter: brightness(1.05) saturate(1.1) contrast(1.03);
   }
 }

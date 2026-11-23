@@ -20,12 +20,12 @@ export function SiteHeader({
   return (
     <header data-header className="sticky top-0 z-40">
       <HeaderScrollState />
-      <div className="container-kflore relative grid h-[var(--header-h)] grid-cols-[1fr_auto] items-center gap-6 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="container-kflore relative grid h-[var(--header-h)] grid-cols-[1fr_auto] items-center gap-6 lg:grid-cols-[1fr_auto_1fr] lg:grid-rows-[4rem_auto] lg:gap-y-0">
         {/* Centered on mobile (the icon row flanks it); falls back into normal grid flow at desktop. */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:static lg:left-auto lg:top-auto lg:col-start-2 lg:row-start-1 lg:translate-x-0 lg:translate-y-0 lg:justify-self-center">
           <Logo inherit />
         </div>
-        <div className="hidden lg:col-start-1 lg:row-start-1 lg:block">
+        <div className="hidden lg:col-span-3 lg:row-start-2 lg:flex lg:justify-center">
           <DesktopNav collections={collections} />
         </div>
         <div className="contents">

@@ -84,7 +84,7 @@ export function HeroCarouselClient({ slides }: { slides: HeroSlideView[] }) {
 
   return (
     <section
-      className="hero-pull relative h-[min(78svh,760px)] min-h-[520px] w-full overflow-hidden bg-soft-black md:h-[min(86svh,900px)] md:min-h-[600px]"
+      className="hero-pull relative h-[min(78svh,760px)] min-h-[600px] w-full overflow-hidden bg-soft-black md:h-[min(86svh,900px)] md:min-h-[600px]"
       aria-roledescription="carousel"
       aria-label="Featured collections"
       onMouseEnter={() => setPaused(true)}
@@ -119,7 +119,7 @@ export function HeroCarouselClient({ slides }: { slides: HeroSlideView[] }) {
             <div className="absolute inset-0 bg-soft-black" style={{ opacity: slide.overlay / 100 }} aria-hidden="true" />
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-soft-black/45 to-transparent" aria-hidden="true" />
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-soft-black/55 to-transparent" aria-hidden="true" />
-            <div className="container-kflore relative z-10 flex h-full items-end pb-24 md:pb-28">{slide.content}</div>
+            <div className="container-kflore relative z-10 flex h-full items-end pb-24 pt-32 md:pb-28 lg:pt-48">{slide.content}</div>
           </div>
         );
       })}
