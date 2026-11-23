@@ -11,8 +11,6 @@ import { cn } from "@/lib/utils";
 const idle: RewardsState = { success: false, message: "" };
 const SEEN_KEY = "kflore-welcome-seen";
 
-const fieldClass =
-  "focus-ring h-11 w-full border border-ivory/40 bg-transparent px-3 text-sm text-ivory placeholder:text-ivory/60";
 const lightFieldClass =
   "focus-ring h-11 w-full border border-taupe/40 bg-white px-3 text-sm text-soft-black placeholder:text-taupe";
 
@@ -126,52 +124,68 @@ function WelcomePopup({ show, onClose }: { show: boolean; onClose: () => void })
   return (
     <div
       role="dialog"
-      aria-label={`Sign up and get ${WELCOME_PERCENT}% off`}
-      className="fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] max-w-[23rem] bg-burgundy px-7 py-8 text-center text-ivory shadow-2xl sm:right-6"
+      aria-label={`Welcome gift: ${WELCOME_PERCENT}% off your first order`}
+      className="fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] max-w-[23rem] bg-ivory p-2 text-center text-soft-black shadow-2xl sm:right-6"
     >
-      <CloseButton onClick={onClose} light />
-      <h2 className="font-serif-display text-xl uppercase tracking-[0.2em]">
-        Sign up &amp; get
-        <br />
-        {WELCOME_PERCENT}% off!
-      </h2>
-      <p className="mt-4 text-sm leading-relaxed text-ivory/90">
-        Subscribe to <strong>unlock {WELCOME_PERCENT}% off</strong> your first order.
-      </p>
-      <p className="mt-3 text-sm text-ivory/90">
-        Use code <strong>{WELCOME_CODE}</strong>
-        <br />
-        <span className="text-xs text-ivory/75">(Min purchase RM{WELCOME_MIN_SPEND})</span>
-      </p>
-      <p className="mt-3 text-xs text-ivory/80">Same-day delivery within Klang Valley</p>
+      <div className="border border-gold/70 px-6 pb-7 pt-8">
+        <CloseButton onClick={onClose} />
+        <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold">KFLORÉ welcome gift</p>
+        <h2 className="mt-3 font-serif-display text-3xl leading-tight text-burgundy [font-variant-numeric:lining-nums]">
+          A little bloom
+          <br />
+          on us
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-soft-black/80">
+          Join our list and enjoy{" "}
+          <strong className="font-semibold text-burgundy [font-variant-numeric:lining-nums]">{WELCOME_PERCENT}% off</strong> your first bouquet.
+        </p>
 
-      {state.success ? (
-        <div className="mt-6 flex flex-col items-center gap-3" role="status">
-          <p className="text-sm">{state.message}</p>
+        <div className="mx-auto mt-5 flex items-center justify-between gap-3 border border-dashed border-gold px-4 py-2.5">
+          <span className="text-left">
+            <span className="block text-[10px] uppercase tracking-[0.2em] text-taupe">Your code</span>
+            <span className="font-medium tracking-[0.18em] text-burgundy">{WELCOME_CODE}</span>
+          </span>
           <button
             type="button"
             onClick={() => {
               navigator.clipboard?.writeText(WELCOME_CODE).then(() => setCopied(true)).catch(() => {});
             }}
-            className="focus-ring border border-gold px-4 py-2 text-xs uppercase tracking-[0.2em] text-gold hover:bg-gold hover:text-burgundy"
+            className="focus-ring text-[10px] font-medium uppercase tracking-[0.2em] text-burgundy underline-offset-4 hover:underline"
           >
-            {copied ? "Copied!" : `Copy ${WELCOME_CODE}`}
+            {copied ? "Copied" : "Copy"}
           </button>
         </div>
-      ) : (
-        <form action={action} className="mt-6 flex flex-col gap-3" noValidate>
-          <input type="email" name="email" required autoComplete="email" placeholder="Enter your email" aria-label="Email address" className={fieldClass} />
-          <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-          {state.message && !state.success && <p className="text-left text-xs text-ivory">{state.message}</p>}
-          <button
-            type="submit"
-            disabled={pending}
-            className="focus-ring h-11 bg-ivory text-xs font-medium uppercase tracking-[0.25em] text-burgundy hover:bg-white disabled:opacity-60"
-          >
-            {pending ? "Subscribing…" : "Subscribe"}
-          </button>
-        </form>
-      )}
+        <p className="mt-2 text-[11px] text-taupe">Min. spend RM{WELCOME_MIN_SPEND} · once per email</p>
+
+        {state.success ? (
+          <p role="status" className="mt-5 text-sm text-burgundy">
+            {state.message}
+          </p>
+        ) : (
+          <form action={action} className="mt-5 flex flex-col gap-2.5" noValidate>
+            <input
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              placeholder="Your email address"
+              aria-label="Email address"
+              className="focus-ring h-11 w-full border border-taupe/40 bg-white px-3 text-sm text-soft-black placeholder:text-taupe"
+            />
+            <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+            {state.message && !state.success && <p className="text-left text-xs text-red-700">{state.message}</p>}
+            <button
+              type="submit"
+              disabled={pending}
+              className="focus-ring h-11 bg-burgundy text-xs font-medium uppercase tracking-[0.25em] text-ivory hover:bg-burgundy-light disabled:opacity-60"
+            >
+              {pending ? "Sending…" : "Claim my gift"}
+            </button>
+          </form>
+        )}
+
+        <p className="mt-4 text-[10px] uppercase tracking-[0.1em] text-taupe">Same-day delivery · KL &amp; Klang Valley</p>
+      </div>
     </div>
   );
 }
