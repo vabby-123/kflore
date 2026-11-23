@@ -26,6 +26,23 @@ interface ManualMethods {
   bank_transfer: string | null;
 }
 
+const METHOD_DESCRIPTIONS: Record<PaymentMethod, string> = {
+  billplz: "Cards, FPX online banking and e-wallets, paid securely on Billplz.",
+  duitnow_qr: "Scan the DuitNow QR with any banking or e-wallet app.",
+  tng_qr: "Pay with your Touch 'n Go eWallet.",
+  maybank_qr: "Scan the Maybank QRPay code in your MAE or Maybank app.",
+  bank_transfer: "Transfer directly to our bank account.",
+};
+
+/** Simple coloured badges (not brand logos) so each method is easy to spot. */
+const METHOD_BADGES: Record<PaymentMethod, { text: string; className: string }> = {
+  billplz: { text: "FPX", className: "bg-slate-800 text-white" },
+  duitnow_qr: { text: "DuitNow QR", className: "bg-pink-600 text-white" },
+  tng_qr: { text: "TNG", className: "bg-blue-600 text-white" },
+  maybank_qr: { text: "QRPAY", className: "bg-yellow-400 text-black" },
+  bank_transfer: { text: "BANK", className: "bg-soft-black text-white" },
+};
+
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   billplz: "Card / FPX Online Banking",
   tng_qr: "Touch 'n Go eWallet (QR)",
@@ -47,15 +64,12 @@ export function CheckoutForm({
   const router = useRouter();
   const [state, formAction, pending] = useActionState(createCheckout, initialState);
 
-  const availableMethods = useMemo<PaymentMethod[]>(() => {
-    const list: PaymentMethod[] = [];
-    if (billplzEnabled) list.push("billplz");
-    if (manualMethods.tng_qr) list.push("tng_qr");
-    if (manualMethods.duitnow_qr) list.push("duitnow_qr");
-    if (manualMethods.maybank_qr) list.push("maybank_qr");
-    if (manualMethods.bank_transfer) list.push("bank_transfer");
-    return list;
-  }, [billplzEnabled, manualMethods]);
+  // Every manual method is always offered. If a QR / bank detail hasn't been saved in the admin yet,
+  // checkout tells the customer we'll WhatsApp them the details right after the order is placed.
+  const availableMethods = useMemo<PaymentMethod[]>(
+    () => [...(billplzEnabled ? (["billplz"] as const) : []), "duitnow_qr", "tng_qr", "maybank_qr", "bank_transfer"],
+    [billplzEnabled]
+  );
 
   const [method, setMethod] = useState<PaymentMethod | undefined>(availableMethods[0]);
   const qrImage = method && method !== "billplz" && method !== "bank_transfer" ? manualMethods[method] : null;
@@ -212,25 +226,37 @@ export function CheckoutForm({
           <Textarea id="deliveryNotes" name="deliveryNotes" rows={2} placeholder="Recipient name, gate code, landmark…" />
         </div>
 
-        {availableMethods.length > 1 && (
-          <div className="flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-label text-taupe">Payment method</span>
-            <div className="flex flex-wrap gap-2">
-              {availableMethods.map((m) => (
-                <button
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-xs uppercase tracking-label text-taupe">Select payment method</legend>
+          <div className="flex flex-col divide-y divide-taupe/15 border border-taupe/25 bg-white">
+            {availableMethods.map((m) => {
+              const badge = METHOD_BADGES[m];
+              const active = method === m;
+              return (
+                <label
                   key={m}
-                  type="button"
-                  onClick={() => setMethod(m)}
-                  className={`focus-ring border px-4 py-2 text-xs uppercase tracking-label ${
-                    method === m ? "border-burgundy bg-burgundy text-ivory" : "border-taupe/40 text-soft-black hover:border-burgundy"
-                  }`}
+                  className={`flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors ${active ? "bg-burgundy/5" : "hover:bg-ivory"}`}
                 >
-                  {METHOD_LABELS[m]}
-                </button>
-              ))}
-            </div>
+                  <input
+                    type="radio"
+                    name="paymentMethodChoice"
+                    value={m}
+                    checked={active}
+                    onChange={() => setMethod(m)}
+                    className="h-4 w-4 shrink-0 accent-[#5a1725]"
+                  />
+                  <span className={`flex h-9 w-20 shrink-0 items-center justify-center text-[11px] font-bold tracking-wide ${badge.className}`}>
+                    {badge.text}
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-sm text-soft-black">{METHOD_LABELS[m]}</span>
+                    <span className="text-xs text-taupe">{METHOD_DESCRIPTIONS[m]}</span>
+                  </span>
+                </label>
+              );
+            })}
           </div>
-        )}
+        </fieldset>
 
         {qrImage && (
           <div className="flex flex-col items-center gap-3 border border-taupe/20 bg-ivory p-6 text-center">
@@ -246,6 +272,18 @@ export function CheckoutForm({
             <p className="text-sm text-soft-black">Transfer {formatPriceMYR(payable)} to:</p>
             <p className="whitespace-pre-line text-sm text-taupe">{manualMethods.bank_transfer}</p>
             <p className="text-xs text-taupe">After transferring, submit this order — we&rsquo;ll confirm once we see your payment.</p>
+          </div>
+        )}
+
+        {isManual && !qrImage && !(method === "bank_transfer" && manualMethods.bank_transfer) && (
+          <div className="flex flex-col gap-2 border border-taupe/20 bg-ivory p-6">
+            <p className="text-sm text-soft-black">
+              Pay {formatPriceMYR(payable)} with {METHOD_LABELS[method]}.
+            </p>
+            <p className="text-xs text-taupe">
+              Place your order and we&rsquo;ll send you our {METHOD_LABELS[method]} payment details on WhatsApp straight away. Your order is confirmed
+              once we receive your payment.
+            </p>
           </div>
         )}
 

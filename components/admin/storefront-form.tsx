@@ -85,7 +85,7 @@ export function StorefrontForm({
 
       <Panel
         title="Payment methods"
-        description="Checkout always offers WhatsApp ordering. Upload a QR code or fill in bank details to also offer that method at checkout — leave blank to hide it. These are manual methods: the customer pays on their own device, then you confirm the payment arrived from Admin → Payments."
+        description="Checkout always offers WhatsApp ordering. Upload a QR code or fill in bank details to also offer that method at checkout — leave blank and checkout will tell the customer we'll WhatsApp them the details after they place the order. These are manual methods: the customer pays on their own device, then you confirm the payment arrived from Admin → Payments."
       >
         <div className="grid gap-6 sm:grid-cols-3">
           <ImageField name="paymentTngQrImage" label="Touch 'n Go eWallet QR" initial={initial.paymentTngQrImage} hint="Export your static TNG QR code as an image." />

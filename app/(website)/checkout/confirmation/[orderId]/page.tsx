@@ -41,8 +41,8 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
             <div className="flex flex-col gap-3">
               <h1 className="font-serif-display text-4xl leading-[1.1]">Order received, {order.customerName.split(" ")[0]}.</h1>
               <p className="text-base text-taupe">
-                We&rsquo;ve recorded your order and will confirm your payment shortly. If you haven&rsquo;t paid yet, please
-                complete it using the method you selected — we&rsquo;ll be in touch on WhatsApp once it&rsquo;s confirmed.
+                We&rsquo;ve recorded your order. Please pay using the method you chose, then send your payment receipt to us on
+                WhatsApp so we can confirm it quickly. If you haven&rsquo;t received our payment details yet, message us below.
               </p>
             </div>
           </>

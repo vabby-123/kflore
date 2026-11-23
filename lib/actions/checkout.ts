@@ -3,9 +3,8 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orderItems, orders, products, productVariants } from "@/lib/db/schema";
-import { checkoutSchema, type PaymentMethod } from "@/lib/validations/checkout";
+import { checkoutSchema } from "@/lib/validations/checkout";
 import { BillplzError, createBill, isBillplzConfigured } from "@/lib/billplz";
-import { getSiteSettings } from "@/lib/db/queries";
 import { SITE_URL } from "@/lib/seo";
 import { logAudit } from "./audit";
 import { evaluateDiscount } from "@/lib/rewards";
@@ -24,17 +23,6 @@ function dateOrNull(v: string) {
   if (!v) return null;
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
-}
-
-/** Which manual methods the admin has actually switched on, per current Storefront settings. */
-async function availableManualMethods(): Promise<Set<PaymentMethod>> {
-  const site = await getSiteSettings();
-  const set = new Set<PaymentMethod>();
-  if (site.paymentTngQrImage) set.add("tng_qr");
-  if (site.paymentDuitnowQrImage) set.add("duitnow_qr");
-  if (site.paymentMaybankQrImage) set.add("maybank_qr");
-  if (site.paymentBankDetails) set.add("bank_transfer");
-  return set;
 }
 
 /**
@@ -75,12 +63,9 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
     if (!isBillplzConfigured()) {
       return { success: false, message: "Card/FPX payment isn't switched on right now — please choose another payment method." };
     }
-  } else {
-    const available = await availableManualMethods();
-    if (!available.has(data.method)) {
-      return { success: false, message: "That payment method isn't available right now — please choose another." };
-    }
   }
+  // Manual methods (DuitNow QR, TNG, Maybank QRPay, bank transfer) are always available: when the admin has
+  // not saved a QR/bank detail yet, the customer is told we'll send the details over WhatsApp.
 
   // Re-price every line from the database (ignore whatever the client thought the price was).
   const productIds = [...new Set(data.items.map((i) => i.productId))];
