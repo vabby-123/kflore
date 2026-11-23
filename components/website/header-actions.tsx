@@ -40,7 +40,7 @@ export function HeaderActions({
 
   return (
     <>
-      <div className="flex items-center justify-self-end">
+      <div className="flex items-center justify-self-end lg:col-start-3 lg:row-start-1">
         <button
           type="button"
           aria-label="Search"
