@@ -9,6 +9,31 @@ function digitsOnly(phone: string) {
   return phone.replace(/[^0-9]/g, "");
 }
 
+/** "601160515983" / "011-6051 5983" / "+60 11-6051 5983" -> "601160515983" (wa.me needs country code, no "+"). */
+export function normalizeWhatsAppNumber(input: string): string {
+  let d = digitsOnly(input);
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.startsWith("0")) d = "6" + d; // Malaysian local format 011-... -> 6011-...
+  return d;
+}
+
+/** Human-readable Malaysian format: "601160515983" -> "+60 11-6051 5983". Other numbers are returned as typed. */
+export function formatPhoneDisplay(input: string): string {
+  const d = normalizeWhatsAppNumber(input);
+  const m = d.match(/^60(1\d)(\d{3,4})(\d{4})$/);
+  if (m) return `+60 ${m[1]}-${m[2]} ${m[3]}`;
+  const k = d.match(/^60(\d{1,2})(\d{3,4})(\d{4})$/);
+  if (k) return `+60 ${k[1]}-${k[2]} ${k[3]}`;
+  return input;
+}
+
+/** "2026-12-24" -> "Thursday, 24 Dec 2026" (parsed as a local date so the weekday never shifts). */
+export function formatDeliveryDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
+}
+
 export function buildWhatsAppUrl(phoneNumber: string, message: string): string {
   const phone = digitsOnly(phoneNumber);
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -46,6 +71,8 @@ export function buildCartOrderMessage(params: {
   items: WhatsAppCartLine[];
   subtotal: number;
   deliveryLocation?: string;
+  deliveryDate?: string;
+  cardMessage?: string;
 }): string {
   const lines = ["KFLORÉ ORDER ENQUIRY", ""];
   for (const item of params.items) {
@@ -54,6 +81,8 @@ export function buildCartOrderMessage(params: {
     lines.push(`RM ${(item.price * item.quantity).toFixed(2)}`, "");
   }
   lines.push(`Subtotal: RM ${params.subtotal.toFixed(2)}`, "");
+  lines.push(`Delivery date: ${params.deliveryDate ? formatDeliveryDate(params.deliveryDate) : "[Please advise]"}`);
   lines.push(`Delivery location: ${params.deliveryLocation?.trim() || "[Please advise]"}`);
+  lines.push(`Message card: ${params.cardMessage?.trim() || "None"}`);
   return lines.join("\n");
 }

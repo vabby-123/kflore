@@ -22,7 +22,7 @@ export const checkoutSchema = z.object({
   // Required for Billplz (receipt); optional for manual methods, but still useful for confirmation.
   email: z.string().trim().max(255).optional().or(z.literal("")),
   deliveryAddress: z.string().trim().min(10, "Please enter a full delivery address").max(500),
-  deliveryDate: z.string().optional().or(z.literal("")),
+  deliveryDate: z.string().min(1, "Please select a delivery date"),
   deliveryTimeSlot: z.string().max(60).optional().or(z.literal("")),
   cardMessage: z.string().trim().max(300).optional().or(z.literal("")),
   deliveryNotes: z.string().trim().max(300).optional().or(z.literal("")),

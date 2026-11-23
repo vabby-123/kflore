@@ -13,7 +13,7 @@ import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useCart } from "@/lib/cart/cart-context";
 import { createCheckout, type CheckoutState } from "@/lib/actions/checkout";
 import { DELIVERY_TIME_SLOTS, type PaymentMethod } from "@/lib/validations/checkout";
-import { buildCartOrderMessage } from "@/lib/whatsapp";
+import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
 import { formatPriceMYR } from "@/lib/utils";
 
 const initialState: CheckoutState = { success: false };
@@ -42,7 +42,7 @@ export function CheckoutForm({
   billplzEnabled: boolean;
   manualMethods: ManualMethods;
 }) {
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, delivery, setDelivery } = useCart();
   const router = useRouter();
   const [state, formAction, pending] = useActionState(createCheckout, initialState);
 
@@ -66,6 +66,9 @@ export function CheckoutForm({
   const whatsappMessage = buildCartOrderMessage({
     items: items.map((i) => ({ name: i.name, variant: i.variant, quantity: i.quantity, price: i.price })),
     subtotal,
+    deliveryLocation: delivery.location,
+    deliveryDate: delivery.date,
+    cardMessage: delivery.cardMessage,
   });
 
   useEffect(() => {
@@ -131,7 +134,7 @@ export function CheckoutForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="deliveryAddress">Delivery address</Label>
-          <Textarea id="deliveryAddress" name="deliveryAddress" rows={3} required placeholder="Unit, street, city, postcode" />
+          <Textarea id="deliveryAddress" name="deliveryAddress" rows={3} required placeholder="Unit, street, city, postcode" defaultValue={delivery.location} />
           {err("deliveryAddress") && <p className="text-xs text-burgundy">{err("deliveryAddress")}</p>}
         </div>
 
@@ -140,7 +143,21 @@ export function CheckoutForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="deliveryDate">Delivery date</Label>
-              <Input id="deliveryDate" name="deliveryDate" type="date" min={new Date().toISOString().slice(0, 10)} />
+              <Input
+                id="deliveryDate"
+                name="deliveryDate"
+                type="date"
+                required
+                value={delivery.date}
+                onChange={(e) => setDelivery({ date: e.target.value })}
+                min={new Date().toISOString().slice(0, 10)}
+              />
+              {delivery.date ? (
+                <p className="text-xs text-taupe">Delivery day: <span className="font-medium text-soft-black">{formatDeliveryDate(delivery.date)}</span></p>
+              ) : (
+                <p className="text-xs font-medium text-red-700">Please select a date to continue checkout.</p>
+              )}
+              {err("deliveryDate") && <p className="text-xs text-burgundy">{err("deliveryDate")}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="deliveryTimeSlot">Preferred time</Label>
@@ -157,8 +174,16 @@ export function CheckoutForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="cardMessage">Message on the card (optional)</Label>
-          <Textarea id="cardMessage" name="cardMessage" rows={2} maxLength={300} placeholder="What should the gift card say?" />
+          <Label htmlFor="cardMessage">Message card (optional) - does your order include a card? Write your message below</Label>
+          <Textarea
+            id="cardMessage"
+            name="cardMessage"
+            rows={2}
+            maxLength={300}
+            placeholder="What should the gift card say?"
+            value={delivery.cardMessage}
+            onChange={(e) => setDelivery({ cardMessage: e.target.value })}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="deliveryNotes">Delivery notes (optional)</Label>

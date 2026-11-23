@@ -12,6 +12,15 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface DeliveryDetails {
+  date: string;
+  cardMessage: string;
+  location: string;
+}
+
+const EMPTY_DELIVERY: DeliveryDetails = { date: "", cardMessage: "", location: "" };
+const DELIVERY_KEY = "kflore-delivery";
+
 interface CartContextValue {
   items: CartItem[];
   isOpen: boolean;
@@ -23,6 +32,9 @@ interface CartContextValue {
   clearCart: () => void;
   subtotal: number;
   count: number;
+  /** Delivery details collected in the cart (ISO date, card text, location) - reused by checkout. */
+  delivery: DeliveryDetails;
+  setDelivery: (patch: Partial<DeliveryDetails>) => void;
 }
 
 const CartContext = React.createContext<CartContextValue | null>(null);
@@ -32,6 +44,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = React.useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
   const [hydrated, setHydrated] = React.useState(false);
+  const [delivery, setDeliveryState] = React.useState<DeliveryDetails>(EMPTY_DELIVERY);
 
   React.useEffect(() => {
     // One-time hydration from localStorage on mount (client-only; avoids SSR hydration mismatch).
@@ -39,6 +52,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) setItems(JSON.parse(raw));
+      const d = window.localStorage.getItem(DELIVERY_KEY);
+      if (d) setDeliveryState({ ...EMPTY_DELIVERY, ...JSON.parse(d) });
     } catch {
       // ignore corrupted storage
     }
@@ -50,10 +65,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      window.localStorage.setItem(DELIVERY_KEY, JSON.stringify(delivery));
     } catch {
       // storage unavailable — cart still works for this session
     }
-  }, [items, hydrated]);
+  }, [items, delivery, hydrated]);
 
   const addItem = React.useCallback((item: CartItem) => {
     setItems((prev) => {
@@ -83,7 +99,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const clearCart = React.useCallback(() => setItems([]), []);
+  const setDelivery = React.useCallback((patch: Partial<DeliveryDetails>) => setDeliveryState((d) => ({ ...d, ...patch })), []);
+  const clearCart = React.useCallback(() => {
+    setItems([]);
+    setDeliveryState(EMPTY_DELIVERY);
+  }, []);
 
   const openCart = React.useCallback(() => setIsOpen(true), []);
   const closeCart = React.useCallback(() => setIsOpen(false), []);
@@ -100,8 +120,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearCart,
       subtotal: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
       count: items.reduce((sum, i) => sum + i.quantity, 0),
+      delivery,
+      setDelivery,
     }),
-    [items, isOpen, openCart, closeCart, addItem, removeItem, updateQuantity, clearCart]
+    [items, isOpen, openCart, closeCart, addItem, removeItem, updateQuantity, clearCart, delivery, setDelivery]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -342,7 +342,7 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
       .where(inArray(productImages.productId, rows.map((r) => r.id)))
       .orderBy(asc(productImages.sortOrder)),
     db
-      .select({ productId: productVariants.productId, price: productVariants.price })
+      .select({ productId: productVariants.productId, name: productVariants.name, price: productVariants.price })
       .from(productVariants)
       .where(inArray(productVariants.productId, rows.map((r) => r.id))),
   ]);
@@ -354,8 +354,10 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
     byProduct.set(img.productId, list);
   }
 
+  const sizesByProduct = new Map<string, string[]>();
   const pricesByProduct = new Map<string, string[]>();
   for (const v of variantPrices) {
+    sizesByProduct.set(v.productId, [...(sizesByProduct.get(v.productId) ?? []), v.name]);
     if (!v.price) continue;
     const list = pricesByProduct.get(v.productId) ?? [];
     list.push(v.price);
@@ -376,6 +378,7 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
       shortDescription: r.shortDescription,
       price: r.price,
       priceFrom,
+      sizes: sortSizes(sizesByProduct.get(r.id) ?? []),
       compareAtPrice: r.compareAtPrice,
       stockStatus: r.stockStatus,
       featured: r.featured,
@@ -384,6 +387,12 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
       category: r.categoryId && r.categoryName && r.categorySlug ? { id: r.categoryId, name: r.categoryName, slug: r.categorySlug } : null,
     };
   });
+}
+
+const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
+function sortSizes(names: string[]): string[] {
+  const rank = (n: string) => { const i = SIZE_ORDER.indexOf(n.toUpperCase()); return i === -1 ? 99 : i; };
+  return [...names].sort((a, b) => rank(a) - rank(b));
 }
 
 export async function getPublishedProducts(opts: ProductQuery = {}): Promise<ProductCardDTO[]> {

@@ -287,8 +287,10 @@ async function main() {
     }
 
     await db.delete(productVariants).where(eqProductVariant(product.id));
-    for (const v of p.variants) {
-      await db.insert(productVariants).values({ productId: product.id, name: v.name, price: v.price });
+    // Every product is offered in four sizes; price steps up per size (edit in /admin → Products).
+    const base = parseFloat(p.price);
+    for (const [i, size] of ["S", "M", "L", "XL"].entries()) {
+      await db.insert(productVariants).values({ productId: product.id, name: size, price: (base + i * 40).toFixed(2), stock: 10 });
     }
 
     const collectionId = collectionIds[p.category];

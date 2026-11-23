@@ -4,7 +4,7 @@ import { Logo } from "@/components/shared/logo";
 import { InstagramIcon, FacebookIcon } from "@/components/shared/social-icons";
 import { NewsletterForm } from "@/components/website/newsletter-form";
 import { buttonVariants } from "@/components/ui/button";
-import { buildGeneralEnquiryMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
+import { buildGeneralEnquiryMessage, buildWhatsAppUrl, formatPhoneDisplay } from "@/lib/whatsapp";
 import type { NavCollection } from "@/lib/collections";
 import type { contactSettings, siteSettings } from "@/lib/db/schema";
 
@@ -118,7 +118,7 @@ export function Footer({
                   rel="noopener noreferrer"
                   className="focus-ring hover:text-ivory"
                 >
-                  WhatsApp: {contact.whatsapp || whatsappNumber}
+                  WhatsApp: {formatPhoneDisplay(contact.whatsapp || whatsappNumber)}
                 </a>
               )}
               {contact.email && (

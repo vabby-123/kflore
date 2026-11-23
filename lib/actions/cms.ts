@@ -1,5 +1,6 @@
 "use server";
 
+import { normalizeWhatsAppNumber } from "@/lib/whatsapp";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { homepage, aboutPage, deliverySettings, contactSettings } from "@/lib/db/schema";
@@ -89,7 +90,8 @@ export async function updateContactSettings(_prev: FormActionState, formData: Fo
   await requireStaff();
   const values = {
     businessName: str(formData, "businessName") || "KFLORÉ",
-    whatsapp: str(formData, "whatsapp") || null,
+    // Accepts "011-6051 5983", "+60 11-6051 5983" or "601160515983"; stored with the country code for wa.me links.
+    whatsapp: str(formData, "whatsapp") ? normalizeWhatsAppNumber(str(formData, "whatsapp")) : null,
     phone: str(formData, "phone") || null,
     email: str(formData, "email") || null,
     address: str(formData, "address") || null,

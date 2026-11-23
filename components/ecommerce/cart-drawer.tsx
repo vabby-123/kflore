@@ -7,18 +7,21 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useCart } from "@/lib/cart/cart-context";
-import { buildCartOrderMessage } from "@/lib/whatsapp";
+import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
 import { formatPriceMYR } from "@/lib/utils";
-import { useState } from "react";
 
 export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsappNumber: string; paymentsEnabled?: boolean }) {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, clearCart } = useCart();
-  const [deliveryLocation, setDeliveryLocation] = useState("");
+  const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, clearCart, delivery, setDelivery } = useCart();
+  const today = new Date();
+  const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const hasDate = Boolean(delivery.date);
 
   const message = buildCartOrderMessage({
     items: items.map((i) => ({ name: i.name, variant: i.variant, quantity: i.quantity, price: i.price })),
     subtotal,
-    deliveryLocation,
+    deliveryLocation: delivery.location,
+    deliveryDate: delivery.date,
+    cardMessage: delivery.cardMessage,
   });
 
   return (
@@ -83,25 +86,64 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
                 <span className="text-taupe">Subtotal</span>
                 <span className="font-medium text-soft-black">{formatPriceMYR(subtotal)}</span>
               </div>
-              <input
-                value={deliveryLocation}
-                onChange={(e) => setDeliveryLocation(e.target.value)}
-                placeholder="Delivery location (optional)"
-                className="focus-ring h-10 border border-taupe/40 bg-white px-3 text-sm"
-              />
-              {paymentsEnabled && (
-                <Button asChild size="lg" className="w-full" onClick={closeCart}>
-                  <Link href="/checkout">PAY ONLINE</Link>
+              <div className="flex flex-col gap-3 border border-taupe/20 p-4">
+                <p className="text-xs font-medium uppercase tracking-label text-soft-black">Please select your preferred date for your order</p>
+                <label className="flex items-center gap-3 text-sm text-soft-black">
+                  <span className="shrink-0 text-taupe">Delivery date</span>
+                  <input
+                    type="date"
+                    value={delivery.date}
+                    min={minDate}
+                    onChange={(e) => setDelivery({ date: e.target.value })}
+                    className="focus-ring h-10 flex-1 border border-taupe/40 bg-white px-3 text-sm"
+                  />
+                </label>
+                {hasDate ? (
+                  <p className="text-xs text-taupe">Delivery day: <span className="font-medium text-soft-black">{formatDeliveryDate(delivery.date)}</span></p>
+                ) : (
+                  <p className="text-xs font-medium text-red-700" role="alert">Please select a date to continue checkout.</p>
+                )}
+                <input
+                  value={delivery.location}
+                  onChange={(e) => setDelivery({ location: e.target.value })}
+                  placeholder="Delivery location (area / address)"
+                  className="focus-ring h-10 border border-taupe/40 bg-white px-3 text-sm"
+                />
+                <label className="flex flex-col gap-1.5 text-xs text-taupe">
+                  Does your order include a message card? Write your message below.
+                  <textarea
+                    value={delivery.cardMessage}
+                    onChange={(e) => setDelivery({ cardMessage: e.target.value })}
+                    rows={3}
+                    maxLength={300}
+                    className="focus-ring border border-taupe/40 bg-white px-3 py-2 text-sm text-soft-black"
+                  />
+                </label>
+              </div>
+              {paymentsEnabled &&
+                (hasDate ? (
+                  <Button asChild size="lg" className="w-full" onClick={closeCart}>
+                    <Link href="/checkout">PAY ONLINE</Link>
+                  </Button>
+                ) : (
+                  <Button size="lg" className="w-full" disabled>
+                    PAY ONLINE
+                  </Button>
+                ))}
+              {hasDate ? (
+                <WhatsAppButton
+                  phoneNumber={whatsappNumber}
+                  message={message}
+                  label="ORDER VIA WHATSAPP"
+                  className="w-full"
+                  size="lg"
+                  variant={paymentsEnabled ? "secondary" : "whatsapp"}
+                />
+              ) : (
+                <Button size="lg" className="w-full" variant={paymentsEnabled ? "secondary" : "whatsapp"} disabled>
+                  ORDER VIA WHATSAPP
                 </Button>
               )}
-              <WhatsAppButton
-                phoneNumber={whatsappNumber}
-                message={message}
-                label="ORDER VIA WHATSAPP"
-                className="w-full"
-                size="lg"
-                variant={paymentsEnabled ? "secondary" : "whatsapp"}
-              />
               <div className="flex justify-between gap-3">
                 <Button variant="ghost" size="sm" onClick={closeCart} asChild>
                   <Link href="/shop">CONTINUE SHOPPING</Link>

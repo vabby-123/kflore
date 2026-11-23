@@ -78,6 +78,15 @@ export function ProductCard({
           {product.name}
         </Link>
         <Price price={product.priceFrom ?? product.price} compareAtPrice={product.priceFrom ? null : product.compareAtPrice} from={Boolean(product.priceFrom)} />
+        {product.sizes && product.sizes.length > 0 && (
+          <ul className="flex flex-wrap gap-1.5" aria-label="Available sizes">
+            {product.sizes.map((s) => (
+              <li key={s} className="min-w-7 border border-taupe/40 px-1.5 py-0.5 text-center text-[10px] font-medium uppercase tracking-[0.1em] text-taupe">
+                {s}
+              </li>
+            ))}
+          </ul>
+        )}
         {!soldOut && (
           <a
             href={buildWhatsAppUrl(
