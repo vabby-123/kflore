@@ -7,11 +7,8 @@ import type { heroSlides } from "@/lib/db/schema";
 
 type Slide = typeof heroSlides.$inferSelect;
 
-const POSITION_CLASS: Record<string, string> = {
-  left: "items-start text-left",
-  center: "items-center text-center mx-auto",
-  right: "items-end text-right ml-auto",
-};
+// Hero copy always sits on the left so it never hides behind pop-ups or the right-hand controls.
+const HERO_TEXT_CLASS = "items-start text-left";
 
 export function SlideMedia({ slide, first }: { slide: Pick<Slide, "image" | "mobileImage" | "objectPosition" | "title">; first: boolean }) {
   // Art-directed <picture>: an independent mobile crop is only downloaded on small screens.
@@ -48,7 +45,7 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
     media: <SlideMedia slide={s} first={i === 0} />,
     overlay: s.overlayOpacity,
     content: (
-      <div className={cn("flex max-w-xl flex-col gap-5 md:gap-6", POSITION_CLASS[s.textPosition] ?? POSITION_CLASS.left)}>
+      <div className={cn("flex max-w-xl flex-col gap-5 md:gap-6", HERO_TEXT_CLASS)}>
         {s.eyebrow && (
           <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-ivory/90">{s.eyebrow}</p>
         )}

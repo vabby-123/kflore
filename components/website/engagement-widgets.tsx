@@ -125,44 +125,35 @@ function WelcomePopup({ show, onClose }: { show: boolean; onClose: () => void })
     <div
       role="dialog"
       aria-label={`Welcome gift: ${WELCOME_PERCENT}% off your first order`}
-      className="fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] max-w-[23rem] bg-ivory p-2 text-center text-soft-black shadow-2xl sm:right-6"
+      className="fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] max-w-[20rem] bg-burgundy p-1.5 text-center text-ivory shadow-2xl sm:right-6"
     >
-      <div className="border border-gold/70 px-6 pb-7 pt-8">
-        <CloseButton onClick={onClose} />
+      <div className="border border-gold/60 px-5 pb-4 pt-5">
+        <CloseButton onClick={onClose} light />
         <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold">KFLORÉ welcome gift</p>
-        <h2 className="mt-3 font-serif-display text-3xl leading-tight text-burgundy [font-variant-numeric:lining-nums]">
-          A little bloom
-          <br />
-          on us
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-soft-black/80">
-          Join our list and enjoy{" "}
-          <strong className="font-semibold text-burgundy [font-variant-numeric:lining-nums]">{WELCOME_PERCENT}% off</strong> your first bouquet.
+        <h2 className="mt-1.5 font-serif-display text-2xl leading-tight [font-variant-numeric:lining-nums]">A little bloom on us</h2>
+        <p className="mt-1.5 text-[13px] leading-snug text-ivory/90">
+          Join our list for <strong className="font-semibold text-gold [font-variant-numeric:lining-nums]">{WELCOME_PERCENT}% off</strong> your first bouquet.
         </p>
 
-        <div className="mx-auto mt-5 flex items-center justify-between gap-3 border border-dashed border-gold px-4 py-2.5">
-          <span className="text-left">
-            <span className="block text-[10px] uppercase tracking-[0.2em] text-taupe">Your code</span>
-            <span className="font-medium tracking-[0.18em] text-burgundy">{WELCOME_CODE}</span>
-          </span>
+        <div className="mt-3 flex items-center justify-between gap-3 border border-dashed border-gold/80 px-3 py-1.5">
+          <span className="text-sm font-medium tracking-[0.18em] text-ivory">{WELCOME_CODE}</span>
           <button
             type="button"
             onClick={() => {
               navigator.clipboard?.writeText(WELCOME_CODE).then(() => setCopied(true)).catch(() => {});
             }}
-            className="focus-ring text-[10px] font-medium uppercase tracking-[0.2em] text-burgundy underline-offset-4 hover:underline"
+            className="focus-ring text-[10px] font-medium uppercase tracking-[0.2em] text-gold underline-offset-4 hover:underline"
           >
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
-        <p className="mt-2 text-[11px] text-taupe">Min. spend RM{WELCOME_MIN_SPEND} · once per email</p>
 
         {state.success ? (
-          <p role="status" className="mt-5 text-sm text-burgundy">
+          <p role="status" className="mt-3 text-[13px] text-ivory">
             {state.message}
           </p>
         ) : (
-          <form action={action} className="mt-5 flex flex-col gap-2.5" noValidate>
+          <form action={action} className="mt-3 flex flex-col gap-2" noValidate>
             <input
               type="email"
               name="email"
@@ -170,21 +161,23 @@ function WelcomePopup({ show, onClose }: { show: boolean; onClose: () => void })
               autoComplete="email"
               placeholder="Your email address"
               aria-label="Email address"
-              className="focus-ring h-11 w-full border border-taupe/40 bg-white px-3 text-sm text-soft-black placeholder:text-taupe"
+              className="focus-ring h-10 w-full border border-ivory/40 bg-transparent px-3 text-sm text-ivory placeholder:text-ivory/60"
             />
             <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-            {state.message && !state.success && <p className="text-left text-xs text-red-700">{state.message}</p>}
+            {state.message && !state.success && <p className="text-left text-xs text-ivory">{state.message}</p>}
             <button
               type="submit"
               disabled={pending}
-              className="focus-ring h-11 bg-burgundy text-xs font-medium uppercase tracking-[0.25em] text-ivory hover:bg-burgundy-light disabled:opacity-60"
+              className="focus-ring h-10 bg-ivory text-xs font-medium uppercase tracking-[0.25em] text-burgundy hover:bg-white disabled:opacity-60"
             >
               {pending ? "Sending…" : "Claim my gift"}
             </button>
           </form>
         )}
 
-        <p className="mt-4 text-[10px] uppercase tracking-[0.1em] text-taupe">Same-day delivery · KL &amp; Klang Valley</p>
+        <p className="mt-3 text-[10px] uppercase tracking-[0.1em] text-ivory/70">
+          Min. spend RM{WELCOME_MIN_SPEND} · Same-day in KL &amp; Klang Valley
+        </p>
       </div>
     </div>
   );
