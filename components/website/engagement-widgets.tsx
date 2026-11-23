@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Gift, MessageCircle, X } from "lucide-react";
+import { Gift, X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/social-icons";
 import { claimWelcomeOffer, joinRewards, lookupPoints, type RewardsState } from "@/lib/actions/rewards";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { JOIN_BONUS_POINTS, REWARD_TIERS, WAYS_TO_EARN, WELCOME_CODE, WELCOME_MIN_SPEND, WELCOME_PERCENT } from "@/lib/rewards";
@@ -41,6 +42,8 @@ function useEscape(open: boolean, close: () => void) {
 /* ------------------------------------------------------------------ */
 function WhatsAppChat({ whatsappNumber, open, setOpen }: { whatsappNumber: string; open: boolean; setOpen: (v: boolean) => void }) {
   const [text, setText] = React.useState("");
+  // Red "new message" dot on the button until the chat has been opened once.
+  const [seen, setSeen] = React.useState(false);
   useEscape(open, () => setOpen(false));
   const topics = ["Same-day delivery", "Wedding flowers", "Custom bouquet", "Corporate / events"];
 
@@ -101,12 +104,16 @@ function WhatsAppChat({ whatsappNumber, open, setOpen }: { whatsappNumber: strin
       )}
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          setSeen(true);
+          setOpen(!open);
+        }}
         aria-label={open ? "Close WhatsApp chat" : "Chat with us on WhatsApp"}
         aria-expanded={open}
-        className="focus-ring fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25d366] text-white shadow-xl transition-transform hover:scale-105 sm:right-6"
+        className="focus-ring fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#4fce5d] text-white shadow-xl ring-4 ring-[#4fce5d]/25 transition-transform hover:scale-105 sm:right-6"
       >
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-7 w-7" />}
+        {open ? <X className="h-6 w-6" /> : <WhatsAppIcon className="h-8 w-8" />}
+        {!open && !seen && <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" aria-hidden="true" />}
       </button>
     </>
   );
