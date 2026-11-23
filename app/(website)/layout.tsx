@@ -1,6 +1,7 @@
 import { AnnouncementBar } from "@/components/website/announcement-bar";
 import { SiteHeader } from "@/components/website/site-header";
 import { Footer } from "@/components/website/footer";
+import { EngagementWidgets } from "@/components/website/engagement-widgets";
 import { CartProvider } from "@/lib/cart/cart-context";
 import { isBillplzConfigured } from "@/lib/billplz";
 import { getContactContent, getPublishedCollections, getSiteSettings } from "@/lib/db/queries";
@@ -28,6 +29,7 @@ export default async function WebsiteLayout({ children }: { children: React.Reac
       <AnnouncementBar site={site} />
       <SiteHeader whatsappNumber={whatsappNumber} collections={navCollections} paymentsEnabled={paymentsEnabled} />
       <main className="flex-1">{children}</main>
+      <EngagementWidgets whatsappNumber={whatsappNumber} />
       <Footer contact={contact} site={site} whatsappNumber={whatsappNumber} collections={navCollections} />
     </CartProvider>
   );

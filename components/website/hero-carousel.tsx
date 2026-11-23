@@ -50,14 +50,14 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
     content: (
       <div className={cn("flex max-w-xl flex-col gap-5 md:gap-6", POSITION_CLASS[s.textPosition] ?? POSITION_CLASS.left)}>
         {s.eyebrow && (
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-ivory/90">{s.eyebrow}</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-ivory/90">{s.eyebrow}</p>
         )}
         {i === 0 ? (
-          <h1 className="font-serif-display text-[2.6rem] leading-[1.04] text-ivory sm:text-6xl lg:text-7xl">{s.title}</h1>
+          <h1 className="font-serif-display text-2xl uppercase leading-[1.25] tracking-[0.18em] text-ivory sm:text-3xl lg:text-[2.1rem]">{s.title}</h1>
         ) : (
-          <h2 className="font-serif-display text-[2.6rem] leading-[1.04] text-ivory sm:text-6xl lg:text-7xl">{s.title}</h2>
+          <h2 className="font-serif-display text-2xl uppercase leading-[1.25] tracking-[0.18em] text-ivory sm:text-3xl lg:text-[2.1rem]">{s.title}</h2>
         )}
-        {s.subtitle && <p className="max-w-md text-sm leading-relaxed text-ivory/85 md:text-base">{s.subtitle}</p>}
+        {s.subtitle && <p className="max-w-sm text-xs leading-relaxed text-ivory/90 md:text-[13px]">{s.subtitle}</p>}
         {(s.primaryCtaLabel || s.secondaryCtaLabel) && (
           <div className="mt-2 flex flex-wrap gap-3">
             {s.primaryCtaLabel && s.primaryCtaHref && (
@@ -87,7 +87,7 @@ function HeroFallback() {
   return (
     <section className="hero-pull relative flex min-h-[70svh] items-end bg-burgundy text-ivory md:min-h-[80svh]">
       <div className="container-kflore pb-20">
-        <h1 className="font-serif-display text-5xl leading-[1.05] md:text-7xl">Flowers, thoughtfully arranged.</h1>
+        <h1 className="font-serif-display text-2xl uppercase leading-[1.25] tracking-[0.18em] md:text-4xl">Flowers, thoughtfully arranged.</h1>
       </div>
     </section>
   );

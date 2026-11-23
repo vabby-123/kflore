@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useCart } from "@/lib/cart/cart-context";
 import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
+import { evaluateDiscount } from "@/lib/rewards";
 import { formatPriceMYR } from "@/lib/utils";
 
 export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsappNumber: string; paymentsEnabled?: boolean }) {
@@ -15,6 +16,7 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
   const today = new Date();
   const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const hasDate = Boolean(delivery.date);
+  const discount = evaluateDiscount(delivery.discountCode, subtotal);
 
   const message = buildCartOrderMessage({
     items: items.map((i) => ({ name: i.name, variant: i.variant, quantity: i.quantity, price: i.price })),
@@ -22,6 +24,8 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
     deliveryLocation: delivery.location,
     deliveryDate: delivery.date,
     cardMessage: delivery.cardMessage,
+    discountCode: discount.valid ? discount.code : undefined,
+    discountAmount: discount.valid ? discount.amount : undefined,
   });
 
   return (
@@ -85,6 +89,25 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
               <div className="flex items-center justify-between text-sm">
                 <span className="text-taupe">Subtotal</span>
                 <span className="font-medium text-soft-black">{formatPriceMYR(subtotal)}</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <input
+                  value={delivery.discountCode}
+                  onChange={(e) => setDelivery({ discountCode: e.target.value.toUpperCase() })}
+                  placeholder="Discount code (e.g. WELCOME10)"
+                  className="focus-ring h-10 border border-taupe/40 bg-white px-3 text-sm uppercase"
+                />
+                {delivery.discountCode.trim() && (
+                  <p className={`text-xs ${discount.valid ? "text-green-700" : "text-red-700"}`}>
+                    {discount.valid ? `${discount.message} You save ${formatPriceMYR(discount.amount)}.` : discount.message}
+                  </p>
+                )}
+                {discount.valid && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-taupe">Total after discount</span>
+                    <span className="font-medium text-soft-black">{formatPriceMYR(subtotal - discount.amount)}</span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-3 border border-taupe/20 p-4">
                 <p className="text-xs font-medium uppercase tracking-label text-soft-black">Please select your preferred date for your order</p>

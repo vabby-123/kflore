@@ -200,6 +200,9 @@ export const orders = pgTable("orders", {
   deliveryTimeSlot: text("delivery_time_slot"),
   /** Gift message to write on the card, separate from internal delivery notes. */
   cardMessage: text("card_message"),
+  /** Discount code applied at checkout (e.g. WELCOME10) and the RM amount it took off. `subtotal` is the amount payable after this. */
+  discountCode: text("discount_code"),
+  discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }).notNull().default("0"),
   status: orderStatusEnum("status").notNull().default("NEW"),
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   notes: text("notes"),
@@ -228,6 +231,31 @@ export const orderItems = pgTable("order_items", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
 }, (t) => ({
   orderIdx: index("order_items_order_idx").on(t.orderId),
+}));
+
+// ---------- Rewards (KFLORÉ Flower Points) ----------
+export const rewardMembers = pgTable("reward_members", {
+  id: id(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  points: integer("points").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  emailIdx: uniqueIndex("reward_members_email_idx").on(t.email),
+}));
+
+export const rewardLedger = pgTable("reward_ledger", {
+  id: id(),
+  memberId: text("member_id").notNull().references(() => rewardMembers.id, { onDelete: "cascade" }),
+  points: integer("points").notNull(),
+  reason: text("reason").notNull(),
+  orderId: text("order_id").references(() => orders.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  memberIdx: index("reward_ledger_member_idx").on(t.memberId),
+  // An order can only earn points once.
+  orderReasonIdx: uniqueIndex("reward_ledger_order_reason_idx").on(t.orderId, t.reason),
 }));
 
 // ---------- CMS Singletons ----------

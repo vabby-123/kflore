@@ -316,20 +316,19 @@ body:has([data-announcement]) .hero-pull {
 }
 
 /* ------------------------------------------------------------------ */
-/* Image hover: slowly pop up and come into focus, slowly settle back. */
+/* Image hover: slow pop-up on hover, equally slow pop-down on leave.  */
+/* Timing and curve match the reference store (8s, scale 1.2).         */
 /* Applies to every image on the page, including the hero.             */
 /* ------------------------------------------------------------------ */
 main img {
-  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), filter 1.1s ease, opacity 0.6s ease;
+  transition: transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease;
   will-change: transform;
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   main .group:hover img,
   main a:hover img,
   main img:hover,
-  main section:hover > img,
   main .hero-slide[data-active="true"]:hover img {
-    transform: scale(1.07);
-    filter: brightness(1.05) saturate(1.1) contrast(1.03);
+    transform: scale(1.2);
   }
 }

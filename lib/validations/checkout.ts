@@ -26,6 +26,7 @@ export const checkoutSchema = z.object({
   deliveryTimeSlot: z.string().max(60).optional().or(z.literal("")),
   cardMessage: z.string().trim().max(300).optional().or(z.literal("")),
   deliveryNotes: z.string().trim().max(300).optional().or(z.literal("")),
+  discountCode: z.string().trim().max(40).optional().or(z.literal("")),
   method: z.enum(PAYMENT_METHODS),
   items: z.array(checkoutItemSchema).min(1, "Your cart is empty"),
 }).refine((d) => d.method !== "billplz" || z.string().email().safeParse(d.email).success, {

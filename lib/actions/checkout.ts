@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orderItems, orders, products, productVariants } from "@/lib/db/schema";
 import { checkoutSchema, type PaymentMethod } from "@/lib/validations/checkout";
@@ -8,6 +8,7 @@ import { BillplzError, createBill, isBillplzConfigured } from "@/lib/billplz";
 import { getSiteSettings } from "@/lib/db/queries";
 import { SITE_URL } from "@/lib/seo";
 import { logAudit } from "./audit";
+import { evaluateDiscount } from "@/lib/rewards";
 
 export interface CheckoutState {
   success: boolean;
@@ -61,6 +62,7 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
     deliveryTimeSlot: String(formData.get("deliveryTimeSlot") || ""),
     cardMessage: String(formData.get("cardMessage") || ""),
     deliveryNotes: String(formData.get("deliveryNotes") || ""),
+    discountCode: String(formData.get("discountCode") || ""),
     method: String(formData.get("method") || ""),
     items: itemsRaw,
   });
@@ -110,6 +112,24 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
     return { success: false, message: "Your cart total must be more than RM 0.00." };
   }
 
+  // Discount code: re-validated here (never trusted from the browser) and limited to one use per email.
+  let discountAmount = 0;
+  let discountCode: string | null = null;
+  if (data.discountCode?.trim()) {
+    const d = evaluateDiscount(data.discountCode, subtotal);
+    if (!d.valid) return { success: false, message: d.message || "That discount code isn't valid.", fieldErrors: { discountCode: [d.message || "Invalid code"] } };
+    if (!data.email) return { success: false, message: "Please enter your email to use a discount code.", fieldErrors: { email: ["Email is required to use a discount code."] } };
+    const [used] = await db
+      .select({ id: orders.id })
+      .from(orders)
+      .where(and(eq(orders.discountCode, d.code), sql`lower(${orders.email}) = ${data.email.trim().toLowerCase()}`))
+      .limit(1);
+    if (used) return { success: false, message: "This discount code has already been used with that email.", fieldErrors: { discountCode: ["Already used."] } };
+    discountAmount = d.amount;
+    discountCode = d.code;
+  }
+  const payable = subtotal - discountAmount;
+
   const [order] = await db
     .insert(orders)
     .values({
@@ -121,7 +141,9 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
       deliveryTimeSlot: data.deliveryTimeSlot || null,
       cardMessage: data.cardMessage || null,
       notes: data.deliveryNotes || null,
-      subtotal: subtotal.toFixed(2),
+      subtotal: payable.toFixed(2),
+      discountCode,
+      discountAmount: discountAmount.toFixed(2),
       paymentProvider: data.method,
       paymentStatus: "PENDING",
     })
@@ -140,13 +162,13 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
 
   if (data.method !== "billplz") {
     // Manual method: no gateway call — the admin confirms the payment by hand once it arrives.
-    await logAudit("create", "order", order.id, `RM ${subtotal.toFixed(2)} via ${data.method}`);
+    await logAudit("create", "order", order.id, `RM ${payable.toFixed(2)} via ${data.method}`);
     return { success: true, orderId: order.id };
   }
 
   try {
     const bill = await createBill({
-      amountCents: Math.round(subtotal * 100),
+      amountCents: Math.round(payable * 100),
       name: data.name,
       email: data.email!,
       mobile: data.phone,
@@ -158,7 +180,7 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
     });
 
     await db.update(orders).set({ providerBillId: bill.id, providerUrl: bill.url, updatedAt: new Date() }).where(eq(orders.id, order.id));
-    await logAudit("create", "order", order.id, `RM ${subtotal.toFixed(2)}`);
+    await logAudit("create", "order", order.id, `RM ${payable.toFixed(2)}`);
 
     return { success: true, redirectUrl: bill.url };
   } catch (err) {

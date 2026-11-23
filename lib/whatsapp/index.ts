@@ -73,6 +73,8 @@ export function buildCartOrderMessage(params: {
   deliveryLocation?: string;
   deliveryDate?: string;
   cardMessage?: string;
+  discountCode?: string;
+  discountAmount?: number;
 }): string {
   const lines = ["KFLORÉ ORDER ENQUIRY", ""];
   for (const item of params.items) {
@@ -80,7 +82,12 @@ export function buildCartOrderMessage(params: {
     if (item.variant) lines.push(`Size: ${item.variant}`);
     lines.push(`RM ${(item.price * item.quantity).toFixed(2)}`, "");
   }
-  lines.push(`Subtotal: RM ${params.subtotal.toFixed(2)}`, "");
+  lines.push(`Subtotal: RM ${params.subtotal.toFixed(2)}`);
+  if (params.discountCode && params.discountAmount) {
+    lines.push(`Discount (${params.discountCode}): -RM ${params.discountAmount.toFixed(2)}`);
+    lines.push(`Total: RM ${(params.subtotal - params.discountAmount).toFixed(2)}`);
+  }
+  lines.push("");
   lines.push(`Delivery date: ${params.deliveryDate ? formatDeliveryDate(params.deliveryDate) : "[Please advise]"}`);
   lines.push(`Delivery location: ${params.deliveryLocation?.trim() || "[Please advise]"}`);
   lines.push(`Message card: ${params.cardMessage?.trim() || "None"}`);

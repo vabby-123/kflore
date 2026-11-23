@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
 import { requireStaff } from "./guard";
 import { logAudit } from "./audit";
+import { awardPointsForOrder } from "@/lib/rewards-server";
 
 type OrderStatusValue = "NEW" | "CONTACTED" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
@@ -30,6 +31,7 @@ export async function markOrderPaidManually(id: string) {
   if (order.paymentProvider === "billplz") throw new Error("Billplz orders are confirmed automatically and can't be marked paid by hand.");
 
   await db.update(orders).set({ paymentStatus: "PAID", paidAt: new Date(), status: "CONFIRMED", updatedAt: new Date() }).where(eq(orders.id, id));
+  await awardPointsForOrder(id);
   await logAudit("mark-paid", "order", id);
   revalidatePath("/admin/payments");
   revalidatePath(`/admin/payments/${id}`);

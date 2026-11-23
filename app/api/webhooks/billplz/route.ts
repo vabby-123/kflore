@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
 import { parseBillplzFields, verifyBillplzSignature } from "@/lib/billplz";
 import { logAudit } from "@/lib/actions/audit";
+import { awardPointsForOrder } from "@/lib/rewards-server";
 
 export const runtime = "nodejs";
 
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       })
       .where(eq(orders.id, order.id));
+    if (paid) await awardPointsForOrder(order.id);
     await logAudit(paid ? "payment-received" : "payment-failed", "order", order.id, fields.id);
     revalidatePath("/admin/payments");
     revalidatePath(`/admin/payments/${order.id}`);

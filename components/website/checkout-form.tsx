@@ -14,6 +14,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { createCheckout, type CheckoutState } from "@/lib/actions/checkout";
 import { DELIVERY_TIME_SLOTS, type PaymentMethod } from "@/lib/validations/checkout";
 import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
+import { evaluateDiscount } from "@/lib/rewards";
 import { formatPriceMYR } from "@/lib/utils";
 
 const initialState: CheckoutState = { success: false };
@@ -63,12 +64,16 @@ export function CheckoutForm({
     () => JSON.stringify(items.map((i) => ({ productId: i.productId, variant: i.variant ?? null, quantity: i.quantity }))),
     [items]
   );
+  const discount = evaluateDiscount(delivery.discountCode, subtotal);
+  const payable = subtotal - (discount.valid ? discount.amount : 0);
   const whatsappMessage = buildCartOrderMessage({
     items: items.map((i) => ({ name: i.name, variant: i.variant, quantity: i.quantity, price: i.price })),
     subtotal,
     deliveryLocation: delivery.location,
     deliveryDate: delivery.date,
     cardMessage: delivery.cardMessage,
+    discountCode: discount.valid ? discount.code : undefined,
+    discountAmount: discount.valid ? discount.amount : undefined,
   });
 
   useEffect(() => {
@@ -113,6 +118,7 @@ export function CheckoutForm({
       <form action={formAction} className="flex flex-col gap-6">
         <input type="hidden" name="items" value={itemsJson} />
         <input type="hidden" name="method" value={method} />
+        <input type="hidden" name="discountCode" value={delivery.discountCode} />
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Full name</Label>
@@ -186,6 +192,22 @@ export function CheckoutForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
+          <Label htmlFor="discountCodeInput">Discount code (optional)</Label>
+          <Input
+            id="discountCodeInput"
+            value={delivery.discountCode}
+            onChange={(e) => setDelivery({ discountCode: e.target.value.toUpperCase() })}
+            placeholder="e.g. WELCOME10"
+            className="uppercase"
+          />
+          {delivery.discountCode.trim() && (
+            <p className={`text-xs ${discount.valid ? "text-green-700" : "text-red-700"}`}>
+              {discount.valid ? `${discount.message} You save ${formatPriceMYR(discount.amount)}. Your email is required to use this code.` : discount.message}
+            </p>
+          )}
+          {err("discountCode") && <p className="text-xs text-burgundy">{err("discountCode")}</p>}
+        </div>
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="deliveryNotes">Delivery notes (optional)</Label>
           <Textarea id="deliveryNotes" name="deliveryNotes" rows={2} placeholder="Recipient name, gate code, landmark…" />
         </div>
@@ -212,7 +234,7 @@ export function CheckoutForm({
 
         {qrImage && (
           <div className="flex flex-col items-center gap-3 border border-taupe/20 bg-ivory p-6 text-center">
-            <p className="text-sm text-soft-black">Scan to pay {formatPriceMYR(subtotal)} with {METHOD_LABELS[method]}</p>
+            <p className="text-sm text-soft-black">Scan to pay {formatPriceMYR(payable)} with {METHOD_LABELS[method]}</p>
             <div className="relative aspect-square w-48 overflow-hidden bg-white">
               <Image src={qrImage} alt={`${METHOD_LABELS[method]} QR code`} fill sizes="192px" className="object-contain" />
             </div>
@@ -221,7 +243,7 @@ export function CheckoutForm({
         )}
         {method === "bank_transfer" && manualMethods.bank_transfer && (
           <div className="flex flex-col gap-2 border border-taupe/20 bg-ivory p-6">
-            <p className="text-sm text-soft-black">Transfer {formatPriceMYR(subtotal)} to:</p>
+            <p className="text-sm text-soft-black">Transfer {formatPriceMYR(payable)} to:</p>
             <p className="whitespace-pre-line text-sm text-taupe">{manualMethods.bank_transfer}</p>
             <p className="text-xs text-taupe">After transferring, submit this order — we&rsquo;ll confirm once we see your payment.</p>
           </div>
@@ -237,8 +259,8 @@ export function CheckoutForm({
               ? "PLACING ORDER…"
               : "REDIRECTING TO PAYMENT…"
             : isManual
-              ? `I'VE PAID — SUBMIT ORDER (${formatPriceMYR(subtotal)})`
-              : `PAY ${formatPriceMYR(subtotal)} NOW`}
+              ? `I'VE PAID — SUBMIT ORDER (${formatPriceMYR(payable)})`
+              : `PAY ${formatPriceMYR(payable)} NOW`}
         </Button>
         {!isManual && (
           <p className="text-center text-xs text-taupe">
@@ -275,6 +297,18 @@ export function CheckoutForm({
           <span>Subtotal</span>
           <span>{formatPriceMYR(subtotal)}</span>
         </div>
+        {discount.valid && (
+          <>
+            <div className="flex items-center justify-between text-sm text-green-700">
+              <span>Discount ({discount.code})</span>
+              <span>-{formatPriceMYR(discount.amount)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm font-medium">
+              <span>Total</span>
+              <span>{formatPriceMYR(payable)}</span>
+            </div>
+          </>
+        )}
         <p className="text-xs text-taupe">Delivery charges, if any, will be confirmed separately — see our Delivery page.</p>
       </aside>
     </div>
