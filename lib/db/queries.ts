@@ -354,10 +354,10 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
     byProduct.set(img.productId, list);
   }
 
-  const sizesByProduct = new Map<string, string[]>();
+  const sizesByProduct = new Map<string, { name: string; price: string | null }[]>();
   const pricesByProduct = new Map<string, string[]>();
   for (const v of variantPrices) {
-    sizesByProduct.set(v.productId, [...(sizesByProduct.get(v.productId) ?? []), v.name]);
+    sizesByProduct.set(v.productId, [...(sizesByProduct.get(v.productId) ?? []), { name: v.name, price: v.price }]);
     if (!v.price) continue;
     const list = pricesByProduct.get(v.productId) ?? [];
     list.push(v.price);
@@ -378,7 +378,7 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
       shortDescription: r.shortDescription,
       price: r.price,
       priceFrom,
-      sizes: sortSizes(sizesByProduct.get(r.id) ?? []),
+      sizeOptions: sortSizes(sizesByProduct.get(r.id) ?? []).map((v) => ({ name: v.name, price: v.price ?? r.price })),
       compareAtPrice: r.compareAtPrice,
       stockStatus: r.stockStatus,
       featured: r.featured,
@@ -390,9 +390,9 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
 }
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
-function sortSizes(names: string[]): string[] {
+function sortSizes<T extends { name: string }>(items: T[]): T[] {
   const rank = (n: string) => { const i = SIZE_ORDER.indexOf(n.toUpperCase()); return i === -1 ? 99 : i; };
-  return [...names].sort((a, b) => rank(a) - rank(b));
+  return [...items].sort((a, b) => rank(a.name) - rank(b.name));
 }
 
 export async function getPublishedProducts(opts: ProductQuery = {}): Promise<ProductCardDTO[]> {

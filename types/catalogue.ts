@@ -30,8 +30,8 @@ export interface ProductCardDTO {
   price: string;
   /** Lowest price across this product's variants, set only when prices actually vary — show as "From {priceFrom}". */
   priceFrom?: string | null;
-  /** Variant / size labels in display order (S, M, L, XL …). */
-  sizes?: string[];
+  /** Size options in display order (S, M, L, XL …), each with its price. */
+  sizeOptions?: { name: string; price: string }[];
   compareAtPrice?: string | null;
   stockStatus: string;
   featured: boolean;

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Price } from "./price";
-import { buildProductOrderMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
+import { ProductCardOptions } from "./product-card-options";
 import { cn, formatPriceMYR } from "@/lib/utils";
 import type { ProductCardDTO } from "@/types/catalogue";
 
@@ -77,29 +76,15 @@ export function ProductCard({
         >
           {product.name}
         </Link>
-        <Price price={product.priceFrom ?? product.price} compareAtPrice={product.priceFrom ? null : product.compareAtPrice} from={Boolean(product.priceFrom)} />
-        {product.sizes && product.sizes.length > 0 && (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Available sizes">
-            {product.sizes.map((s) => (
-              <li key={s} className="min-w-7 border border-taupe/40 px-1.5 py-0.5 text-center text-[10px] font-medium uppercase tracking-[0.1em] text-taupe">
-                {s}
-              </li>
-            ))}
-          </ul>
-        )}
-        {!soldOut && (
-          <a
-            href={buildWhatsAppUrl(
-              whatsappNumber,
-              buildProductOrderMessage({ productName: product.name, quantity: 1, price: formatPriceMYR(product.price) })
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="focus-ring mt-1 w-fit text-[11px] font-medium uppercase tracking-[0.16em] text-burgundy underline-offset-4 hover:underline"
-          >
-            Order via WhatsApp
-          </a>
-        )}
+        <ProductCardOptions
+          productName={product.name}
+          price={product.price}
+          priceFrom={product.priceFrom}
+          compareAtPrice={product.compareAtPrice}
+          sizeOptions={product.sizeOptions ?? []}
+          whatsappNumber={whatsappNumber}
+          soldOut={soldOut}
+        />
       </div>
     </article>
   );
