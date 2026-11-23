@@ -40,7 +40,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     getContactContent(),
     getDeliveryContent(),
   ]);
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
   const relatedFiltered = related.filter((p) => p.id !== product.id).slice(0, 4);
 
   const jsonLd = productJsonLd({

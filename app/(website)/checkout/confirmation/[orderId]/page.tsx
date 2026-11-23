@@ -15,7 +15,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
   const [order, contact] = await Promise.all([getOrderForConfirmation(orderId), getContactContent()]);
   if (!order) notFound();
 
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
   const whatsappHref = buildWhatsAppUrl(
     whatsappNumber,
     `Hi KFLORÉ, I'd like to check on my order ${order.id.slice(0, 8).toUpperCase()}.`

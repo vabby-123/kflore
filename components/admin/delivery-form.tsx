@@ -31,7 +31,7 @@ export function DeliveryForm({ initial }: { initial: DeliverySettings }) {
       </label>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="charges">Delivery Charges</Label>
-        <Input id="charges" name="charges" defaultValue={initial.charges ?? ""} placeholder="e.g. RM 15 (KL) / RM 25 (Selangor)" />
+        <Input id="charges" name="charges" defaultValue={initial.charges ?? ""} placeholder="e.g. RM 15 (KL) / RM 25 (Klang Valley)" />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="orderCutOffTime">Order Cut-Off Time</Label>

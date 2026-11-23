@@ -93,7 +93,7 @@ const FALLBACK_ABOUT: typeof aboutPage.$inferSelect = {
 
 const FALLBACK_DELIVERY: typeof deliverySettings.$inferSelect = {
   id: "delivery",
-  areas: "Kuala Lumpur & Selangor",
+  areas: "Kuala Lumpur & Klang Valley",
   excludedAreas: null,
   sameDayAvailable: true,
   charges: null,
@@ -124,7 +124,7 @@ const FALLBACK_CONTACT: typeof contactSettings.$inferSelect = {
 const FALLBACK_SITE: typeof siteSettings.$inferSelect = {
   id: "site",
   announcementEnabled: true,
-  announcementMessage: "Same-Day Delivery • Kuala Lumpur & Selangor",
+  announcementMessage: "Same-Day Delivery • Kuala Lumpur & Klang Valley",
   announcementHref: null,
   announcementBg: "#5A1725",
   announcementFg: "#F5F0E8",

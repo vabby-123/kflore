@@ -126,7 +126,7 @@ export function Footer({
                   Email: {contact.email}
                 </a>
               )}
-              <span>Kuala Lumpur &amp; Selangor</span>
+              <span>Kuala Lumpur &amp; Klang Valley</span>
               {contact.address && <span className="whitespace-pre-line">{contact.address}</span>}
               {contact.openingHours && <span className="mt-3 whitespace-pre-line text-ivory/65">{contact.openingHours}</span>}
             </address>

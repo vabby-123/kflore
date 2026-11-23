@@ -62,7 +62,7 @@ export function localBusinessJsonLd(contact: {
     name: contact.businessName,
     address: contact.address || undefined,
     telephone: contact.phone || undefined,
-    areaServed: ["Kuala Lumpur", "Selangor"],
+    areaServed: ["Kuala Lumpur", "Klang Valley"],
     url: SITE_URL,
   };
 }

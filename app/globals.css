@@ -169,7 +169,7 @@ body {
 [data-header] {
   --hdr-fg: var(--color-soft-black);
   --hdr-accent: var(--color-burgundy);
-  --hdr-brand: var(--color-burgundy);
+  --hdr-brand: var(--color-gold);
   background-color: var(--color-ivory);
   border-bottom: 1px solid color-mix(in srgb, var(--color-taupe) 25%, transparent);
   color: var(--hdr-fg);
@@ -179,14 +179,29 @@ body {
 body:has([data-hero-page]) [data-header]:not([data-scrolled]) {
   --hdr-fg: var(--color-ivory);
   --hdr-accent: var(--color-gold);
-  --hdr-brand: var(--color-ivory);
+  --hdr-brand: var(--color-gold);
   background-color: transparent;
   border-bottom-color: transparent;
+}
+
+/* Announcement bar: no maroon block. Gold text on inner pages, ivory over the homepage hero image. */
+[data-announcement] {
+  background-color: transparent !important;
+  color: var(--color-gold) !important;
+}
+body:has([data-hero-page]) [data-announcement] {
+  position: relative;
+  z-index: 41;
+  color: var(--color-ivory) !important;
 }
 
 /* The homepage hero slides underneath the sticky header. */
 .hero-pull {
   margin-top: calc(var(--header-h) * -1);
+}
+/* Let the hero image run up behind the (now transparent) announcement bar too. */
+body:has([data-announcement]) .hero-pull {
+  margin-top: calc((var(--header-h) + 2.25rem) * -1);
 }
 
 /* Mega menu panels: CSS-only hover / focus-within. */

@@ -17,14 +17,14 @@ export const revalidate = 120;
 export const metadata = buildMetadata({
   title: "KFLORÉ | Luxury Floral Arrangements & Flowers",
   description:
-    "KFLORÉ creates timeless floral arrangements designed to make every occasion unforgettable. Luxury bouquets, boxes and same-day delivery across Kuala Lumpur & Selangor.",
+    "KFLORÉ creates timeless floral arrangements designed to make every occasion unforgettable. Luxury bouquets, boxes and same-day delivery across Kuala Lumpur & Klang Valley.",
   path: "/",
 });
 
 export default async function HomePage() {
   const data = await getHomepageData();
   const { home, site, sections, slides, delivery, contact, signature, journal, bestSellers, newIn } = data;
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
 
   // Admin picks which collections are featured; if none are, fall back to the first few published ones.
   const mosaic = data.featuredCollections.length > 0 ? data.featuredCollections : (await getPublishedCollections()).slice(0, 6);

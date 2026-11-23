@@ -36,7 +36,7 @@ export default async function CollectionDetailPage({ params }: { params: Promise
     getPublishedProducts({ collectionSlug: slug, limit: 48 }),
     getContactContent(),
   ]);
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
 
   return (
     <div className="container-kflore page-section flex flex-col gap-12">

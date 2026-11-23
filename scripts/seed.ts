@@ -321,7 +321,7 @@ async function main() {
     .insert(deliverySettings)
     .values({
       id: "delivery",
-      areas: "Kuala Lumpur & Selangor",
+      areas: "Kuala Lumpur & Klang Valley",
       sameDayAvailable: true,
       charges: null,
       orderCutOffTime: null,
@@ -334,7 +334,7 @@ async function main() {
     .values({
       id: "contact",
       businessName: "KFLORÉ",
-      whatsapp: process.env.WHATSAPP_NUMBER || "60123456789",
+      whatsapp: process.env.WHATSAPP_NUMBER || "601160515983",
       phone: null,
       email: process.env.BUSINESS_EMAIL || null,
       address: null,
@@ -422,7 +422,7 @@ async function main() {
       {
         eyebrow: "KFLORÉ / CELEBRATIONS",
         title: "Make their day bloom.",
-        subtitle: "Birthday flowers, delivered same-day across Kuala Lumpur & Selangor.",
+        subtitle: "Birthday flowers, delivered same-day across Kuala Lumpur & Klang Valley.",
         image: PLACEHOLDER("cat-birthday-flowers"),
         primaryCtaLabel: "BIRTHDAY FLOWERS",
         primaryCtaHref: "/collections/birthday-flowers",

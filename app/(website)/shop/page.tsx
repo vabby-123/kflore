@@ -34,7 +34,7 @@ export default async function ShopPage({
     getContactContent(),
   ]);
 
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (

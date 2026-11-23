@@ -8,13 +8,13 @@ export const revalidate = 300;
 
 export const metadata = buildMetadata({
   title: "Same-Day Delivery",
-  description: "KFLORÉ offers same-day flower delivery across Kuala Lumpur & Selangor.",
+  description: "KFLORÉ offers same-day flower delivery across Kuala Lumpur & Klang Valley.",
   path: "/delivery",
 });
 
 export default async function DeliveryPage() {
   const [delivery, contact] = await Promise.all([getDeliveryContent(), getContactContent()]);
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
 
   return (
     <div className="bg-burgundy section text-ivory">

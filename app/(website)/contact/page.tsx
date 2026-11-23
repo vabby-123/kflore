@@ -15,7 +15,7 @@ export const metadata = buildMetadata({
 
 export default async function ContactPage() {
   const contact = await getContactContent();
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
 
   const jsonLd = localBusinessJsonLd({
     businessName: contact.businessName,

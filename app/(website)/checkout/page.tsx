@@ -10,7 +10,7 @@ export const metadata = buildMetadata({ title: "Checkout", description: "Complet
 
 export default async function CheckoutPage() {
   const [contact, site] = await Promise.all([getContactContent(), getSiteSettings()]);
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
 
   const manualMethods = {
     tng_qr: site.paymentTngQrImage,

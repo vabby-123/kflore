@@ -257,7 +257,7 @@ export const aboutPage = pgTable("about_page", {
 
 export const deliverySettings = pgTable("delivery_settings", {
   id: text("id").primaryKey().default("delivery"),
-  areas: text("areas").notNull().default("Kuala Lumpur & Selangor"),
+  areas: text("areas").notNull().default("Kuala Lumpur & Klang Valley"),
   excludedAreas: text("excluded_areas"),
   sameDayAvailable: boolean("same_day_available").notNull().default(true),
   charges: text("charges"),
@@ -364,7 +364,7 @@ export const homepageSections = pgTable("homepage_sections", {
 export const siteSettings = pgTable("site_settings", {
   id: text("id").primaryKey().default("site"),
   announcementEnabled: boolean("announcement_enabled").notNull().default(true),
-  announcementMessage: text("announcement_message").notNull().default("Same-Day Delivery • Kuala Lumpur & Selangor"),
+  announcementMessage: text("announcement_message").notNull().default("Same-Day Delivery • Kuala Lumpur & Klang Valley"),
   announcementHref: text("announcement_href"),
   announcementBg: text("announcement_bg").notNull().default("#5A1725"),
   announcementFg: text("announcement_fg").notNull().default("#F5F0E8"),

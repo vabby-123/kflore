@@ -64,7 +64,7 @@ export async function updateAboutPage(_prev: FormActionState, formData: FormData
 export async function updateDeliverySettings(_prev: FormActionState, formData: FormData): Promise<FormActionState> {
   await requireStaff();
   const values = {
-    areas: str(formData, "areas") || "Kuala Lumpur & Selangor",
+    areas: str(formData, "areas") || "Kuala Lumpur & Klang Valley",
     excludedAreas: str(formData, "excludedAreas") || null,
     sameDayAvailable: formData.get("sameDayAvailable") === "on",
     charges: str(formData, "charges") || null,

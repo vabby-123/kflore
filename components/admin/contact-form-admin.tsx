@@ -25,7 +25,7 @@ export function ContactSettingsForm({ initial, showBusinessFields = true }: { in
       )}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="whatsapp">WhatsApp Number</Label>
-        <Input id="whatsapp" name="whatsapp" defaultValue={initial.whatsapp ?? ""} placeholder="e.g. 60123456789" />
+        <Input id="whatsapp" name="whatsapp" defaultValue={initial.whatsapp ?? ""} placeholder="e.g. 601160515983" />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="phone">Phone Number</Label>

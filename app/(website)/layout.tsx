@@ -15,7 +15,7 @@ export default async function WebsiteLayout({ children }: { children: React.Reac
     getSiteSettings(),
     getPublishedCollections(),
   ]);
-  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "60123456789";
+  const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
   const navCollections = collections.map((c) => ({ name: c.name, slug: c.slug, type: c.type }));
   const paymentsEnabled =
     isBillplzConfigured() ||

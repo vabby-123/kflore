@@ -12,6 +12,7 @@ export function AnnouncementBar({ site }: { site: Site }) {
 
   return (
     <div
+      data-announcement
       className="text-center text-[11px] font-medium uppercase tracking-[0.18em]"
       style={{ backgroundColor: site.announcementBg, color: site.announcementFg }}
     >
