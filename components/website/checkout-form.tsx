@@ -85,6 +85,7 @@ export function CheckoutForm({
     subtotal,
     deliveryLocation: delivery.location,
     deliveryDate: delivery.date,
+    timeSlot: delivery.timeSlot,
     cardMessage: delivery.cardMessage,
     discountCode: discount.valid ? discount.code : undefined,
     discountAmount: discount.valid ? discount.amount : undefined,
@@ -181,7 +182,12 @@ export function CheckoutForm({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="deliveryTimeSlot">Preferred time</Label>
-              <select id="deliveryTimeSlot" name="deliveryTimeSlot" className="focus-ring h-11 border border-taupe/40 bg-white px-3 text-sm">
+              <select
+                id="deliveryTimeSlot"
+                name="deliveryTimeSlot"
+                value={delivery.timeSlot}
+                onChange={(e) => setDelivery({ timeSlot: e.target.value })}
+                className="focus-ring h-11 border border-taupe/40 bg-white px-3 text-sm">
                 <option value="">No preference</option>
                 {DELIVERY_TIME_SLOTS.map((slot) => (
                   <option key={slot} value={slot}>

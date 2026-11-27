@@ -389,7 +389,7 @@ async function attachCardImages(rows: CardRow[]): Promise<ProductCardDTO[]> {
   });
 }
 
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
+const SIZE_ORDER = ["XS", "S", "REGULAR", "M", "L", "XL", "XXL"];
 function sortSizes<T extends { name: string }>(items: T[]): T[] {
   const rank = (n: string) => { const i = SIZE_ORDER.indexOf(n.toUpperCase()); return i === -1 ? 99 : i; };
   return [...items].sort((a, b) => rank(a.name) - rank(b.name));

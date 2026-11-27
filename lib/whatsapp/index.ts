@@ -49,6 +49,9 @@ export function buildProductOrderMessage(params: {
   quantity: number;
   price?: string | null;
   customerMessage?: string;
+  deliveryDate?: string;
+  timeSlot?: string;
+  deliveryLocation?: string;
 }): string {
   const lines = [
     "Hi KFLORÉ,",
@@ -60,8 +63,11 @@ export function buildProductOrderMessage(params: {
   lines.push(`Quantity: ${params.quantity}`);
   if (params.price) lines.push(`Price: ${params.price}`);
   lines.push("");
-  if (params.customerMessage) {
-    lines.push(`Message: ${params.customerMessage}`, "");
+  if (params.deliveryDate) lines.push(`Delivery date: ${formatDeliveryDate(params.deliveryDate)}`);
+  if (params.timeSlot) lines.push(`Preferred time: ${params.timeSlot}`);
+  if (params.deliveryLocation?.trim()) lines.push(`Delivery location: ${params.deliveryLocation.trim()}`);
+  if (params.customerMessage?.trim()) {
+    lines.push(`Message card: ${params.customerMessage.trim()}`, "");
   }
   lines.push("Please let me know the availability and delivery details.");
   return lines.join("\n");
@@ -72,6 +78,7 @@ export function buildCartOrderMessage(params: {
   subtotal: number;
   deliveryLocation?: string;
   deliveryDate?: string;
+  timeSlot?: string;
   cardMessage?: string;
   discountCode?: string;
   discountAmount?: number;
@@ -89,6 +96,7 @@ export function buildCartOrderMessage(params: {
   }
   lines.push("");
   lines.push(`Delivery date: ${params.deliveryDate ? formatDeliveryDate(params.deliveryDate) : "[Please advise]"}`);
+  if (params.timeSlot) lines.push(`Preferred time: ${params.timeSlot}`);
   lines.push(`Delivery location: ${params.deliveryLocation?.trim() || "[Please advise]"}`);
   lines.push(`Message card: ${params.cardMessage?.trim() || "None"}`);
   return lines.join("\n");

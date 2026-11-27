@@ -17,9 +17,10 @@ export interface DeliveryDetails {
   cardMessage: string;
   location: string;
   discountCode: string;
+  timeSlot: string;
 }
 
-const EMPTY_DELIVERY: DeliveryDetails = { date: "", cardMessage: "", location: "", discountCode: "" };
+const EMPTY_DELIVERY: DeliveryDetails = { date: "", cardMessage: "", location: "", discountCode: "", timeSlot: "" };
 const DELIVERY_KEY = "kflore-delivery";
 
 interface CartContextValue {

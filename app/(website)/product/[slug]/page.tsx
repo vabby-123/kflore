@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ProductGallery } from "@/components/ecommerce/product-gallery";
 import { ProductOrderPanel } from "@/components/ecommerce/product-order-panel";
+import { ProductDetails } from "@/components/ecommerce/product-details";
 import { ProductGrid } from "@/components/ecommerce/product-grid";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { getProductBySlug, getPublishedProducts, getPublishedProductSlugs, getContactContent, getDeliveryContent } from "@/lib/db/queries";
@@ -65,13 +66,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       />
 
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-        <ProductGallery images={product.images} productName={product.name} />
+        <div className="lg:sticky lg:top-32 lg:self-start">
+          <ProductGallery images={product.images} productName={product.name} />
+        </div>
 
         <div className="flex flex-col gap-8">
           <ProductOrderPanel
             productId={product.id}
             slug={product.slug}
             name={product.name}
+            shortDescription={product.shortDescription}
             price={product.price}
             compareAtPrice={product.compareAtPrice}
             stockStatus={product.stockStatus}
@@ -81,46 +85,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             imageUrl={product.images[0]?.url}
           />
 
-          {product.description && (
-            <div className="flex flex-col gap-2 border-t border-taupe/20 pt-6">
-              <span className="text-xs uppercase tracking-label text-taupe">Description</span>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-soft-black">{product.description}</p>
-            </div>
-          )}
-
-          <dl className="grid grid-cols-2 gap-4 border-t border-taupe/20 pt-6 text-sm">
-            {product.flowerType && (
-              <div>
-                <dt className="text-xs uppercase tracking-label text-taupe">Flower Type</dt>
-                <dd className="text-soft-black">{product.flowerType}</dd>
-              </div>
-            )}
-            {product.colour && (
-              <div>
-                <dt className="text-xs uppercase tracking-label text-taupe">Colour</dt>
-                <dd className="text-soft-black">{product.colour}</dd>
-              </div>
-            )}
-            {product.occasion && (
-              <div>
-                <dt className="text-xs uppercase tracking-label text-taupe">Occasion</dt>
-                <dd className="text-soft-black">{product.occasion}</dd>
-              </div>
-            )}
-            {product.size && (
-              <div>
-                <dt className="text-xs uppercase tracking-label text-taupe">Size</dt>
-                <dd className="text-soft-black">{product.size}</dd>
-              </div>
-            )}
-          </dl>
-
-          <div className="flex flex-col gap-1 border-t border-taupe/20 pt-6 text-sm text-taupe">
-            <span className="text-xs uppercase tracking-label text-burgundy">Delivery Information</span>
-            <span>Delivery Area: {delivery.areas}</span>
-            {delivery.orderCutOffTime && <span>Order Cut-Off: {delivery.orderCutOffTime}</span>}
-            {delivery.charges && <span>Delivery Charges: {delivery.charges}</span>}
-          </div>
+          <ProductDetails
+            description={product.description}
+            delivery={delivery}
+            attributes={[
+              { label: "Flower Type", value: product.flowerType },
+              { label: "Colour", value: product.colour },
+              { label: "Occasion", value: product.occasion },
+              { label: "Size", value: product.size },
+            ]}
+          />
         </div>
       </div>
 
