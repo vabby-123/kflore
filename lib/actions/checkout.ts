@@ -87,7 +87,10 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
     let price = parseFloat(product.price);
     if (item.variant) {
       const variant = variantRows.find((v) => v.productId === product.id && v.name === item.variant);
-      if (variant?.price) price = parseFloat(variant.price);
+      if (!variant) {
+        return { success: false, message: `Size "${item.variant}" of "${product.name}" is no longer available. Please remove it from your cart and choose again.` };
+      }
+      if (variant.price) price = parseFloat(variant.price);
     }
     lines.push({ productId: product.id, name: product.name, variant: item.variant ?? null, quantity: item.quantity, price });
   }

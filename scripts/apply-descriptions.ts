@@ -1,5 +1,5 @@
 /**
- * Writes real descriptions onto the catalogue (matched by slug) and renames the smallest size "S" to "Regular".
+ * Writes real descriptions onto the catalogue (matched by slug) and keeps two sizes: R (formerly "S" / "Regular") and M. L and XL are removed.
  * Safe to run more than once.
  *
  *   npx tsx scripts/apply-descriptions.ts
@@ -8,7 +8,7 @@
  * against the actual arrangement.
  */
 import "dotenv/config";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "../lib/db";
 import { products, productVariants } from "../lib/db/schema";
 
@@ -98,8 +98,9 @@ async function main() {
       .returning({ id: products.id });
     updated += rows.length;
   }
-  const renamed = await db.update(productVariants).set({ name: "Regular" }).where(eq(productVariants.name, "S")).returning({ id: productVariants.id });
-  console.log(`Descriptions updated: ${updated}. Sizes renamed S -> Regular: ${renamed.length}.`);
+  const renamed = await db.update(productVariants).set({ name: "R" }).where(inArray(productVariants.name, ["S", "Regular"])).returning({ id: productVariants.id });
+  const removed = await db.delete(productVariants).where(inArray(productVariants.name, ["L", "XL"])).returning({ id: productVariants.id });
+  console.log(`Descriptions updated: ${updated}. Sizes renamed to R: ${renamed.length}. L/XL removed: ${removed.length}.`);
   process.exit(0);
 }
 

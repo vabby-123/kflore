@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { DELIVERY_TIME_SLOTS } from "@/lib/validations/checkout";
+import { availableTimeSlots } from "@/lib/validations/checkout";
 
 export interface CartItem {
   productId: string;
@@ -40,6 +40,11 @@ interface CartContextValue {
   setDelivery: (patch: Partial<DeliveryDetails>) => void;
 }
 
+/** Clears a chosen time that no longer exists, or isn't offered on the chosen date (e.g. morning today). */
+function withValidSlot(d: DeliveryDetails): DeliveryDetails {
+  return d.timeSlot && !availableTimeSlots(d.date).includes(d.timeSlot) ? { ...d, timeSlot: "" } : d;
+}
+
 const CartContext = React.createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "kflore-cart";
 
@@ -58,8 +63,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const d = window.localStorage.getItem(DELIVERY_KEY);
       if (d) {
         const saved: DeliveryDetails = { ...EMPTY_DELIVERY, ...JSON.parse(d) };
-        if (!(DELIVERY_TIME_SLOTS as readonly string[]).includes(saved.timeSlot)) saved.timeSlot = "";
-        setDeliveryState(saved);
+        setDeliveryState(withValidSlot(saved));
       }
     } catch {
       // ignore corrupted storage
@@ -106,7 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const setDelivery = React.useCallback((patch: Partial<DeliveryDetails>) => setDeliveryState((d) => ({ ...d, ...patch })), []);
+  const setDelivery = React.useCallback((patch: Partial<DeliveryDetails>) => setDeliveryState((d) => withValidSlot({ ...d, ...patch })), []);
   const clearCart = React.useCallback(() => {
     setItems([]);
     setDeliveryState(EMPTY_DELIVERY);

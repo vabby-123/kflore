@@ -50,7 +50,7 @@ export function ProductDetails({
           <li>Fresh flowers, hand-arranged by our florists on the day of delivery</li>
           <li>Wrapping or presentation in the style pictured</li>
           <li>Your personal message card, if you add one</li>
-          <li>Larger sizes are fuller than Regular, in the same style and colour palette</li>
+          <li>Size M is fuller than R, in the same style and colour palette</li>
         </ul>
       </Section>
 

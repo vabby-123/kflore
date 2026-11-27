@@ -9,7 +9,7 @@ import { Price } from "@/components/ecommerce/price";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart/cart-context";
 import { buildProductOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
-import { DELIVERY_TIME_SLOTS } from "@/lib/validations/checkout";
+import { availableTimeSlots } from "@/lib/validations/checkout";
 import { cn, formatPriceMYR } from "@/lib/utils";
 import { toast } from "sonner";
 import type { ProductVariantDTO } from "@/types/catalogue";
@@ -22,10 +22,8 @@ const STOCK_LABELS: Record<string, { label: string; variant: "gold" | "muted" | 
 };
 
 const SIZE_NOTES: Record<string, string> = {
-  REGULAR: "Our classic size",
+  R: "Our classic size",
   M: "Fuller",
-  L: "Generous",
-  XL: "Grand statement",
 };
 
 const MESSAGE_LIMIT = 300;
@@ -75,7 +73,7 @@ export function ProductOrderPanel({
 }) {
   const router = useRouter();
   const priceOf = (v: ProductVariantDTO) => (v.price ? parseFloat(v.price) : parseFloat(price));
-  // Cheapest first, so sizes always read Regular -> XL.
+  // Cheapest first, so sizes always read R, then M.
   const sortedVariants = useMemo(
     () => [...variants].sort((a, b) => parseFloat(a.price ?? price) - parseFloat(b.price ?? price)),
     [variants, price]
@@ -139,7 +137,7 @@ export function ProductOrderPanel({
       {sortedVariants.length > 0 && (
         <div className="flex flex-col gap-3">
           <StepTitle n={1}>Choose your size</StepTitle>
-          <div role="radiogroup" aria-label="Size" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div role="radiogroup" aria-label="Size" className="grid grid-cols-2 gap-2">
             {sortedVariants.map((v) => {
               const active = variant === v.name;
               return (
@@ -214,7 +212,7 @@ export function ProductOrderPanel({
               className={cn(fieldClass, "h-11")}
             >
               <option value="">Preferred time: no preference</option>
-              {DELIVERY_TIME_SLOTS.map((slot) => (
+              {availableTimeSlots(delivery.date).map((slot) => (
                 <option key={slot} value={slot}>
                   {slot}
                 </option>

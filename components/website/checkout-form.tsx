@@ -12,7 +12,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useCart } from "@/lib/cart/cart-context";
 import { createCheckout, type CheckoutState } from "@/lib/actions/checkout";
-import { DELIVERY_TIME_SLOTS, type PaymentMethod } from "@/lib/validations/checkout";
+import { availableTimeSlots, type PaymentMethod } from "@/lib/validations/checkout";
 import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
 import { evaluateDiscount } from "@/lib/rewards";
 import { formatPriceMYR } from "@/lib/utils";
@@ -189,7 +189,7 @@ export function CheckoutForm({
                 onChange={(e) => setDelivery({ timeSlot: e.target.value })}
                 className="focus-ring h-11 border border-taupe/40 bg-white px-3 text-sm">
                 <option value="">No preference</option>
-                {DELIVERY_TIME_SLOTS.map((slot) => (
+                {availableTimeSlots(delivery.date).map((slot) => (
                   <option key={slot} value={slot}>
                     {slot}
                   </option>

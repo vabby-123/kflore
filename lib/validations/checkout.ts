@@ -13,6 +13,16 @@ export const DELIVERY_TIME_SLOTS = [
   "Evening (6pm – 8pm)",
 ] as const;
 
+/** Today's date (yyyy-mm-dd) in the shop's time zone, wherever the code runs. */
+export function shopToday(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).format(new Date());
+}
+
+/** Same-day orders can't be delivered in the morning slot. */
+export function availableTimeSlots(date: string): readonly string[] {
+  return date && date === shopToday() ? DELIVERY_TIME_SLOTS.filter((s) => !s.startsWith("Morning")) : DELIVERY_TIME_SLOTS;
+}
+
 export const PAYMENT_METHODS = ["billplz", "tng_qr", "duitnow_qr", "maybank_qr", "bank_transfer"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
@@ -32,6 +42,9 @@ export const checkoutSchema = z.object({
 }).refine((d) => d.method !== "billplz" || z.string().email().safeParse(d.email).success, {
   message: "A valid email is required for card/FPX payment (your receipt is sent here).",
   path: ["email"],
+}).refine((d) => !d.deliveryTimeSlot || availableTimeSlots(d.deliveryDate).includes(d.deliveryTimeSlot), {
+  message: "That time isn't available for the chosen date. Please pick another.",
+  path: ["deliveryTimeSlot"],
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

@@ -196,7 +196,7 @@ export function ProductForm({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-taupe">Quick add:</span>
-          {["S", "M", "L", "XL"].map((size) => (
+          {["R", "M"].map((size) => (
             <button
               key={size}
               type="button"

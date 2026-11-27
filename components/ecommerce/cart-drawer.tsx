@@ -9,7 +9,7 @@ import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useCart } from "@/lib/cart/cart-context";
 import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
 import { evaluateDiscount } from "@/lib/rewards";
-import { DELIVERY_TIME_SLOTS } from "@/lib/validations/checkout";
+import { availableTimeSlots } from "@/lib/validations/checkout";
 import { formatPriceMYR } from "@/lib/utils";
 
 export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsappNumber: string; paymentsEnabled?: boolean }) {
@@ -135,7 +135,7 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
                   className="focus-ring h-10 border border-taupe/40 bg-white px-3 text-sm"
                 >
                   <option value="">Preferred time: no preference</option>
-                  {DELIVERY_TIME_SLOTS.map((slot) => (
+                  {availableTimeSlots(delivery.date).map((slot) => (
                     <option key={slot} value={slot}>
                       {slot}
                     </option>
