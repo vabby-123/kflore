@@ -18,11 +18,9 @@ const iconBtn =
 export function HeaderActions({
   whatsappNumber,
   collections,
-  paymentsEnabled,
 }: {
   whatsappNumber: string;
   collections: NavCollection[];
-  paymentsEnabled: boolean;
 }) {
   const { count, openCart, isOpen: cartOpen } = useCart();
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -40,7 +38,7 @@ export function HeaderActions({
 
   return (
     <>
-      <div className="flex items-center justify-self-end lg:col-start-3 lg:row-start-1">
+      <div className="col-span-2 flex items-center justify-self-end lg:col-span-1 lg:col-start-3 lg:row-start-1">
         <button
           type="button"
           aria-label="Search"
@@ -48,7 +46,7 @@ export function HeaderActions({
             setSearchUsed(true);
             setSearchOpen(true);
           }}
-          className={iconBtn}
+          className={`${iconBtn} max-sm:absolute max-sm:left-3 max-sm:top-1/2 max-sm:-translate-y-1/2`}
         >
           <Search className="h-[18px] w-[18px]" />
         </button>
@@ -57,7 +55,7 @@ export function HeaderActions({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat with us on WhatsApp"
-          className={`${iconBtn} hidden sm:inline-flex`}
+          className={`${iconBtn} max-sm:hidden`}
         >
           <MessageCircle className="h-[18px] w-[18px]" />
         </a>
@@ -91,7 +89,7 @@ export function HeaderActions({
       {menuUsed && (
         <MobileMenu open={menuOpen} onOpenChange={setMenuOpen} collections={collections} whatsappNumber={whatsappNumber} />
       )}
-      {(cartUsed || cartOpen) && <CartDrawer whatsappNumber={whatsappNumber} paymentsEnabled={paymentsEnabled} />}
+      {(cartUsed || cartOpen) && <CartDrawer whatsappNumber={whatsappNumber} />}
     </>
   );
 }

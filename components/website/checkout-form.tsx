@@ -12,44 +12,15 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useCart } from "@/lib/cart/cart-context";
 import { createCheckout, type CheckoutState } from "@/lib/actions/checkout";
-import { availableTimeSlots, type PaymentMethod } from "@/lib/validations/checkout";
+import { availableTimeSlots, shopToday, type PaymentMethod } from "@/lib/validations/checkout";
+import { CardMessageField } from "@/components/ecommerce/card-message-field";
+import { PaymentMethodList } from "@/components/website/payment-method-list";
+import type { ManualMethods } from "@/lib/payments";
 import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
 import { evaluateDiscount } from "@/lib/rewards";
 import { formatPriceMYR } from "@/lib/utils";
 
 const initialState: CheckoutState = { success: false };
-
-interface ManualMethods {
-  tng_qr: string | null;
-  duitnow_qr: string | null;
-  maybank_qr: string | null;
-  bank_transfer: string | null;
-}
-
-const METHOD_DESCRIPTIONS: Record<PaymentMethod, string> = {
-  billplz: "Cards, FPX online banking and e-wallets, paid securely on Billplz.",
-  duitnow_qr: "Scan the DuitNow QR with any banking or e-wallet app.",
-  tng_qr: "Pay with your Touch 'n Go eWallet.",
-  maybank_qr: "Scan the Maybank QRPay code in your MAE or Maybank app.",
-  bank_transfer: "Transfer directly to our bank account.",
-};
-
-/** Simple coloured badges (not brand logos) so each method is easy to spot. */
-const METHOD_BADGES: Record<PaymentMethod, { text: string; className: string }> = {
-  billplz: { text: "FPX", className: "bg-slate-800 text-white" },
-  duitnow_qr: { text: "DuitNow QR", className: "bg-pink-600 text-white" },
-  tng_qr: { text: "TNG", className: "bg-blue-600 text-white" },
-  maybank_qr: { text: "QRPAY", className: "bg-yellow-400 text-black" },
-  bank_transfer: { text: "BANK", className: "bg-soft-black text-white" },
-};
-
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  billplz: "Card / FPX Online Banking",
-  tng_qr: "Touch 'n Go eWallet (QR)",
-  duitnow_qr: "DuitNow QR",
-  maybank_qr: "Maybank QRPay",
-  bank_transfer: "Bank Transfer",
-};
 
 export function CheckoutForm({
   whatsappNumber,
@@ -72,7 +43,6 @@ export function CheckoutForm({
   );
 
   const [method, setMethod] = useState<PaymentMethod | undefined>(availableMethods[0]);
-  const qrImage = method && method !== "billplz" && method !== "bank_transfer" ? manualMethods[method] : null;
 
   const itemsJson = useMemo(
     () => JSON.stringify(items.map((i) => ({ productId: i.productId, variant: i.variant ?? null, quantity: i.quantity }))),
@@ -136,13 +106,13 @@ export function CheckoutForm({
         <input type="hidden" name="discountCode" value={delivery.discountCode} />
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Full name</Label>
+          <Label htmlFor="name">Your name (sender)</Label>
           <Input id="name" name="name" required autoComplete="name" />
           {err("name") && <p className="text-xs text-burgundy">{err("name")}</p>}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">Your phone</Label>
             <Input id="phone" name="phone" required autoComplete="tel" placeholder="012-345 6789" />
             {err("phone") && <p className="text-xs text-burgundy">{err("phone")}</p>}
           </div>
@@ -153,6 +123,20 @@ export function CheckoutForm({
             {method === "billplz" && <p className="text-xs text-taupe">Your payment receipt is sent here.</p>}
           </div>
         </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="recipientName">Recipient name (optional)</Label>
+            <Input id="recipientName" name="recipientName" maxLength={120} placeholder="Who is receiving the flowers?" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="recipientPhone">Recipient phone (optional)</Label>
+            <Input id="recipientPhone" name="recipientPhone" maxLength={30} placeholder="For the delivery rider" />
+          </div>
+        </div>
+        <label className="flex items-center gap-3 text-sm text-soft-black">
+          <input type="checkbox" name="anonymous" className="h-4 w-4 accent-[#5a1725]" />
+          Surprise delivery: don&rsquo;t tell the recipient my name
+        </label>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="deliveryAddress">Delivery address</Label>
           <Textarea id="deliveryAddress" name="deliveryAddress" rows={3} required placeholder="Unit, street, city, postcode" defaultValue={delivery.location} />
@@ -171,7 +155,7 @@ export function CheckoutForm({
                 required
                 value={delivery.date}
                 onChange={(e) => setDelivery({ date: e.target.value })}
-                min={new Date().toISOString().slice(0, 10)}
+                min={shopToday()}
               />
               {delivery.date ? (
                 <p className="text-xs text-taupe">Delivery day: <span className="font-medium text-soft-black">{formatDeliveryDate(delivery.date)}</span></p>
@@ -199,18 +183,7 @@ export function CheckoutForm({
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="cardMessage">Message card (optional) - does your order include a card? Write your message below</Label>
-          <Textarea
-            id="cardMessage"
-            name="cardMessage"
-            rows={2}
-            maxLength={300}
-            placeholder="What should the gift card say?"
-            value={delivery.cardMessage}
-            onChange={(e) => setDelivery({ cardMessage: e.target.value })}
-          />
-        </div>
+        <CardMessageField name="cardMessage" value={delivery.cardMessage} onChange={(cardMessage) => setDelivery({ cardMessage })} />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="discountCodeInput">Discount code (optional)</Label>
           <Input
@@ -229,81 +202,22 @@ export function CheckoutForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="deliveryNotes">Delivery notes (optional)</Label>
-          <Textarea id="deliveryNotes" name="deliveryNotes" rows={2} placeholder="Recipient name, gate code, landmark…" />
+          <Textarea id="deliveryNotes" name="deliveryNotes" rows={2} placeholder="Gate code, landmark, where to leave it…" />
         </div>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-xs uppercase tracking-label text-taupe">Select payment method</legend>
-          <div className="flex flex-col divide-y divide-taupe/15 border border-taupe/25 bg-white">
-            {availableMethods.map((m) => {
-              const badge = METHOD_BADGES[m];
-              const active = method === m;
-              return (
-                <label
-                  key={m}
-                  className={`flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors ${active ? "bg-burgundy/5" : "hover:bg-ivory"}`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethodChoice"
-                    value={m}
-                    checked={active}
-                    onChange={() => setMethod(m)}
-                    className="h-4 w-4 shrink-0 accent-[#5a1725]"
-                  />
-                  <span className={`flex h-9 w-20 shrink-0 items-center justify-center text-[11px] font-bold tracking-wide ${badge.className}`}>
-                    {badge.text}
-                  </span>
-                  <span className="flex flex-col">
-                    <span className="text-sm text-soft-black">{METHOD_LABELS[m]}</span>
-                    <span className="text-xs text-taupe">{METHOD_DESCRIPTIONS[m]}</span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        {qrImage && (
-          <div className="flex flex-col items-center gap-3 border border-taupe/20 bg-ivory p-6 text-center">
-            <p className="text-sm text-soft-black">Scan to pay {formatPriceMYR(payable)} with {METHOD_LABELS[method]}</p>
-            <div className="relative aspect-square w-48 overflow-hidden bg-white">
-              <Image src={qrImage} alt={`${METHOD_LABELS[method]} QR code`} fill sizes="192px" className="object-contain" />
-            </div>
-            <p className="text-xs text-taupe">After scanning and paying, submit this order — we&rsquo;ll confirm once we see your payment.</p>
-          </div>
-        )}
-        {method === "bank_transfer" && manualMethods.bank_transfer && (
-          <div className="flex flex-col gap-2 border border-taupe/20 bg-ivory p-6">
-            <p className="text-sm text-soft-black">Transfer {formatPriceMYR(payable)} to:</p>
-            <p className="whitespace-pre-line text-sm text-taupe">{manualMethods.bank_transfer}</p>
-            <p className="text-xs text-taupe">After transferring, submit this order — we&rsquo;ll confirm once we see your payment.</p>
-          </div>
-        )}
-
-        {isManual && !qrImage && !(method === "bank_transfer" && manualMethods.bank_transfer) && (
-          <div className="flex flex-col gap-2 border border-taupe/20 bg-ivory p-6">
-            <p className="text-sm text-soft-black">
-              Pay {formatPriceMYR(payable)} with {METHOD_LABELS[method]}.
-            </p>
-            <p className="text-xs text-taupe">
-              Place your order and we&rsquo;ll send you our {METHOD_LABELS[method]} payment details on WhatsApp straight away. Your order is confirmed
-              once we receive your payment.
-            </p>
-          </div>
-        )}
+        <PaymentMethodList methods={availableMethods} selected={method} onSelect={setMethod} amount={payable} manualMethods={manualMethods} />
 
         {!state.success && state.message && (
           <p className="border border-burgundy/30 bg-burgundy/5 p-4 text-sm text-burgundy">{state.message}</p>
         )}
 
-        <Button type="submit" size="lg" disabled={pending} className="w-full">
+        <Button type="submit" size="lg" disabled={pending} className="w-full bg-green-700 text-white hover:bg-green-800">
           {pending
             ? isManual
               ? "PLACING ORDER…"
               : "REDIRECTING TO PAYMENT…"
             : isManual
-              ? `I'VE PAID — SUBMIT ORDER (${formatPriceMYR(payable)})`
+              ? `SUBMIT ORDER (${formatPriceMYR(payable)})`
               : `PAY ${formatPriceMYR(payable)} NOW`}
         </Button>
         {!isManual && (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Check, Minus, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
@@ -11,8 +11,16 @@ import { buildCartOrderMessage, formatDeliveryDate } from "@/lib/whatsapp";
 import { evaluateDiscount } from "@/lib/rewards";
 import { availableTimeSlots } from "@/lib/validations/checkout";
 import { formatPriceMYR } from "@/lib/utils";
+import { CardMessageField } from "./card-message-field";
+import { PaymentBadge } from "./payment-badge";
 
-export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsappNumber: string; paymentsEnabled?: boolean }) {
+const CART_PROMISES = [
+  "Fresh flowers, hand-arranged on the day of delivery",
+  "Your message card included with the order",
+  "Same-day orders: afternoon or evening delivery",
+];
+
+export function CartDrawer({ whatsappNumber }: { whatsappNumber: string }) {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, clearCart, delivery, setDelivery } = useCart();
   const today = new Date();
   const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
@@ -85,13 +93,8 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
                   </li>
                 ))}
               </ul>
-            </div>
 
-            <div className="flex flex-col gap-4 border-t border-taupe/20 p-6">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-taupe">Subtotal</span>
-                <span className="font-medium text-soft-black">{formatPriceMYR(subtotal)}</span>
-              </div>
+              <div className="mt-6 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <input
                   value={delivery.discountCode}
@@ -103,12 +106,6 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
                   <p className={`text-xs ${discount.valid ? "text-green-700" : "text-red-700"}`}>
                     {discount.valid ? `${discount.message} You save ${formatPriceMYR(discount.amount)}.` : discount.message}
                   </p>
-                )}
-                {discount.valid && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-taupe">Total after discount</span>
-                    <span className="font-medium text-soft-black">{formatPriceMYR(subtotal - discount.amount)}</span>
-                  </div>
                 )}
               </div>
               <div className="flex flex-col gap-3 border border-taupe/20 p-4">
@@ -147,41 +144,16 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
                   placeholder="Delivery location (area / address)"
                   className="focus-ring h-10 border border-taupe/40 bg-white px-3 text-sm"
                 />
-                <label className="flex flex-col gap-1.5 text-xs text-taupe">
-                  Does your order include a message card? Write your message below.
-                  <textarea
-                    value={delivery.cardMessage}
-                    onChange={(e) => setDelivery({ cardMessage: e.target.value })}
-                    rows={3}
-                    maxLength={300}
-                    className="focus-ring border border-taupe/40 bg-white px-3 py-2 text-sm text-soft-black"
-                  />
-                </label>
+                <CardMessageField value={delivery.cardMessage} onChange={(cardMessage) => setDelivery({ cardMessage })} />
               </div>
-              {paymentsEnabled &&
-                (hasDate ? (
-                  <Button asChild size="lg" className="w-full" onClick={closeCart}>
-                    <Link href="/checkout">PAY ONLINE</Link>
-                  </Button>
-                ) : (
-                  <Button size="lg" className="w-full" disabled>
-                    PAY ONLINE
-                  </Button>
+              <ul className="flex flex-col gap-2 text-xs text-soft-black">
+                {CART_PROMISES.map((text) => (
+                  <li key={text} className="flex items-start gap-2">
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-700" strokeWidth={3} aria-hidden="true" />
+                    {text}
+                  </li>
                 ))}
-              {hasDate ? (
-                <WhatsAppButton
-                  phoneNumber={whatsappNumber}
-                  message={message}
-                  label="ORDER VIA WHATSAPP"
-                  className="w-full"
-                  size="lg"
-                  variant={paymentsEnabled ? "secondary" : "whatsapp"}
-                />
-              ) : (
-                <Button size="lg" className="w-full" variant={paymentsEnabled ? "secondary" : "whatsapp"} disabled>
-                  ORDER VIA WHATSAPP
-                </Button>
-              )}
+              </ul>
               <div className="flex justify-between gap-3">
                 <Button variant="ghost" size="sm" onClick={closeCart} asChild>
                   <Link href="/shop">CONTINUE SHOPPING</Link>
@@ -189,6 +161,48 @@ export function CartDrawer({ whatsappNumber, paymentsEnabled = false }: { whatsa
                 <Button variant="link" size="sm" onClick={clearCart}>
                   Clear cart
                 </Button>
+              </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-taupe/20 p-5">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-taupe">Subtotal</span>
+                <span className="text-soft-black">{formatPriceMYR(subtotal)}</span>
+              </div>
+              {discount.valid && (
+                <div className="flex items-center justify-between text-sm text-green-700">
+                  <span>Discount ({discount.code})</span>
+                  <span>-{formatPriceMYR(discount.amount)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-sm font-medium text-soft-black">
+                <span>Total</span>
+                <span>{formatPriceMYR(subtotal - (discount.valid ? discount.amount : 0))}</span>
+              </div>
+              <p className="text-[11px] text-taupe">Delivery charges, if any, are confirmed separately.</p>
+              {!hasDate && <p className="text-xs font-medium text-red-700">Choose a delivery date above to continue.</p>}
+              {hasDate ? (
+                <Button asChild size="lg" className="w-full bg-green-700 text-white hover:bg-green-800" onClick={closeCart}>
+                  <Link href="/checkout">CHECKOUT &amp; PAY</Link>
+                </Button>
+              ) : (
+                <Button size="lg" className="w-full" disabled>
+                  CHECKOUT &amp; PAY
+                </Button>
+              )}
+              {hasDate ? (
+                <WhatsAppButton phoneNumber={whatsappNumber} message={message} label="ORDER VIA WHATSAPP" className="w-full" variant="secondary" />
+              ) : (
+                <Button className="w-full" variant="secondary" disabled>
+                  ORDER VIA WHATSAPP
+                </Button>
+              )}
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                <span className="sr-only">We accept DuitNow QR, TNG eWallet, Maybank QRPay and bank transfer</span>
+                {(["duitnow_qr", "tng_qr", "maybank_qr", "bank_transfer"] as const).map((m) => (
+                  <PaymentBadge key={m} method={m} className="h-8 w-[4.25rem]" />
+                ))}
               </div>
             </div>
           </>

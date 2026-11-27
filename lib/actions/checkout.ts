@@ -51,6 +51,9 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
     cardMessage: String(formData.get("cardMessage") || ""),
     deliveryNotes: String(formData.get("deliveryNotes") || ""),
     discountCode: String(formData.get("discountCode") || ""),
+    recipientName: String(formData.get("recipientName") || ""),
+    recipientPhone: String(formData.get("recipientPhone") || ""),
+    anonymous: formData.get("anonymous") === "on",
     method: String(formData.get("method") || ""),
     items: itemsRaw,
   });
@@ -118,6 +121,16 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
   }
   const payable = subtotal - discountAmount;
 
+  // Recipient details are kept in the order notes, which the admin order page already shows.
+  const notes = [
+    data.recipientName && `Recipient: ${data.recipientName}`,
+    data.recipientPhone && `Recipient phone: ${data.recipientPhone}`,
+    data.anonymous && "SURPRISE: do not tell the recipient the sender's name",
+    data.deliveryNotes,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const [order] = await db
     .insert(orders)
     .values({
@@ -128,7 +141,7 @@ export async function createCheckout(_prev: CheckoutState, formData: FormData): 
       deliveryDate: dateOrNull(data.deliveryDate ?? ""),
       deliveryTimeSlot: data.deliveryTimeSlot || null,
       cardMessage: data.cardMessage || null,
-      notes: data.deliveryNotes || null,
+      notes: notes || null,
       subtotal: payable.toFixed(2),
       discountCode,
       discountAmount: discountAmount.toFixed(2),

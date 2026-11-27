@@ -11,11 +11,9 @@ import type { NavCollection } from "@/lib/collections";
 export function SiteHeader({
   whatsappNumber,
   collections,
-  paymentsEnabled,
 }: {
   whatsappNumber: string;
   collections: NavCollection[];
-  paymentsEnabled: boolean;
 }) {
   return (
     <header data-header className="sticky top-0 z-40">
@@ -29,7 +27,7 @@ export function SiteHeader({
           <DesktopNav collections={collections} />
         </div>
         <div className="contents">
-          <HeaderActions whatsappNumber={whatsappNumber} collections={collections} paymentsEnabled={paymentsEnabled} />
+          <HeaderActions whatsappNumber={whatsappNumber} collections={collections} />
         </div>
       </div>
     </header>

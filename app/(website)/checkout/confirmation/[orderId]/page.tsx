@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { OrderStatusPoller } from "@/components/website/order-status-poller";
-import { getContactContent, getOrderForConfirmation } from "@/lib/db/queries";
+import { getContactContent, getOrderForConfirmation, getSiteSettings } from "@/lib/db/queries";
+import { PaymentInstructions } from "@/components/ecommerce/payment-instructions";
+import { METHOD_LABELS } from "@/lib/payments";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { formatPriceMYR } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
@@ -12,7 +14,7 @@ export const metadata = buildMetadata({ title: "Order Confirmation", description
 
 export default async function OrderConfirmationPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = await params;
-  const [order, contact] = await Promise.all([getOrderForConfirmation(orderId), getContactContent()]);
+  const [order, contact, site] = await Promise.all([getOrderForConfirmation(orderId), getContactContent(), getSiteSettings()]);
   if (!order) notFound();
 
   const whatsappNumber = contact.whatsapp || process.env.WHATSAPP_NUMBER || "601160515983";
@@ -23,6 +25,18 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
   // Billplz's webhook will flip this automatically; a manual method (QR/bank transfer) is
   // confirmed by hand from the admin, so there's nothing to poll for.
   const isManualMethod = order.paymentProvider !== "billplz";
+  const manualMethods = {
+    tng_qr: site.paymentTngQrImage,
+    duitnow_qr: site.paymentDuitnowQrImage,
+    maybank_qr: site.paymentMaybankQrImage,
+    bank_transfer: site.paymentBankDetails,
+  };
+  const manualMethod = (Object.keys(manualMethods) as (keyof typeof manualMethods)[]).find((m) => m === order.paymentProvider);
+  const reference = order.id.slice(0, 8).toUpperCase();
+  const receiptHref = buildWhatsAppUrl(
+    whatsappNumber,
+    `Hi KFLORÉ, here is my payment receipt for order ${reference} (${formatPriceMYR(order.subtotal)}${manualMethod ? `, ${METHOD_LABELS[manualMethod]}` : ""}).`
+  );
 
   return (
     <div className="container-kflore page-section">
@@ -41,8 +55,8 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
             <div className="flex flex-col gap-3">
               <h1 className="font-serif-display text-4xl leading-[1.1]">Order received, {order.customerName.split(" ")[0]}.</h1>
               <p className="text-base text-taupe">
-                We&rsquo;ve recorded your order. Please pay using the method you chose, then send your payment receipt to us on
-                WhatsApp so we can confirm it quickly. If you haven&rsquo;t received our payment details yet, message us below.
+                We&rsquo;ve recorded your order. Complete your payment below, then send us the receipt on WhatsApp so we can
+                confirm it quickly.
               </p>
             </div>
           </>
@@ -62,6 +76,18 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
               <p className="text-base text-taupe">Your payment didn&rsquo;t go through, so this order hasn&rsquo;t been placed. No charge was made.</p>
             </div>
           </>
+        )}
+
+        {order.paymentStatus === "PENDING" && manualMethod && (
+          <div className="flex w-full flex-col gap-4 border border-taupe/25 bg-ivory p-6 text-left">
+            <PaymentInstructions method={manualMethod} amount={order.subtotal} manualMethods={manualMethods} />
+            <p className="text-xs text-taupe">
+              Payment reference: <span className="font-medium text-soft-black">{reference}</span>
+            </p>
+            <a href={receiptHref} target="_blank" rel="noopener noreferrer" className={buttonVariants({ className: "w-full bg-green-700 text-white hover:bg-green-800" })}>
+              Send payment receipt on WhatsApp
+            </a>
+          </div>
         )}
 
         {(order.deliveryDate || order.deliveryTimeSlot || order.cardMessage) && (
