@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { DELIVERY_TIME_SLOTS } from "@/lib/validations/checkout";
 
 export interface CartItem {
   productId: string;
@@ -55,7 +56,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) setItems(JSON.parse(raw));
       const d = window.localStorage.getItem(DELIVERY_KEY);
-      if (d) setDeliveryState({ ...EMPTY_DELIVERY, ...JSON.parse(d) });
+      if (d) {
+        const saved: DeliveryDetails = { ...EMPTY_DELIVERY, ...JSON.parse(d) };
+        if (!(DELIVERY_TIME_SLOTS as readonly string[]).includes(saved.timeSlot)) saved.timeSlot = "";
+        setDeliveryState(saved);
+      }
     } catch {
       // ignore corrupted storage
     }

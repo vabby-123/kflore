@@ -8,9 +8,9 @@ export const checkoutItemSchema = z.object({
 
 /** Fixed delivery windows — kept as plain labels (not an enum) so they're easy to adjust later. */
 export const DELIVERY_TIME_SLOTS = [
-  "Morning (9am – 12pm)",
-  "Afternoon (12pm – 4pm)",
-  "Evening (4pm – 8pm)",
+  "Morning (10am – 12pm)",
+  "Afternoon (2pm – 5pm)",
+  "Evening (6pm – 8pm)",
 ] as const;
 
 export const PAYMENT_METHODS = ["billplz", "tng_qr", "duitnow_qr", "maybank_qr", "bank_transfer"] as const;
